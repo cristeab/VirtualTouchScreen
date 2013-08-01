@@ -46,9 +46,6 @@ private:
 	int offsetX;
 	int offsetY;
 	double scaleFactor;
-	int nbSwipes;
-	int swipeCounter;
-	bool tapForForwardSwitch;
 	cv::KalmanFilter KF;
     cv::Mat_<float> measurement;
 	ConfigDialog *config;

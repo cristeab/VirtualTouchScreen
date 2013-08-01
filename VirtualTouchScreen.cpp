@@ -9,7 +9,7 @@
 #include "VirtualTouchScreen.h"
 //#include "ConfigDialog.h"
 
-#define APPLICATION_NAME "Presenter Helper"
+#define APPLICATION_NAME "Virtual Touch Screen"
 
 PresenterHelper::PresenterHelper(QWidget *parent)
 	: QMainWindow(parent),
@@ -19,8 +19,6 @@ PresenterHelper::PresenterHelper(QWidget *parent)
 	pointerSize(POINTER_SIZE),
 	offsetX(OFFSET_X), offsetY(OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
-	nbSwipes(NB_SWIPES_PER_PAGE_SWITCH), swipeCounter(0),
-	tapForForwardSwitch(false),
 	KF(cv::KalmanFilter(4, 2, 0)),
 	measurement(cv::Mat_<float>(2,1)),
 	config(NULL),
@@ -30,7 +28,7 @@ PresenterHelper::PresenterHelper(QWidget *parent)
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 
 	loadSettings();
-	loadPointer(pointerIconPath, pointerSize);
+	//loadPointer(pointerIconPath, pointerSize);
 
 	//get screen size
 	QDesktopWidget *desktop = QApplication::desktop();
@@ -141,41 +139,17 @@ void PresenterHelper::onMoveCursor(int x, int y)
 
 void PresenterHelper::onTap(int x, int y)
 {
-	if (!tapForForwardSwitch)
-	{
-		qDebug() << "onTap: mouse event";
-		mouse_event(MOUSEEVENTF_LEFTDOWN, static_cast<int>(x), 
-			static_cast<int>(y), 0, 0);
-		mouse_event(MOUSEEVENTF_LEFTUP, static_cast<int>(x), 
-			static_cast<int>(y), 0, 0);
-	}
-	else
-	{
-		qDebug() << "onTap: keyboard event";
-		keybd_event(VK_RIGHT & 0xff, 0, 0, 0);
-		keybd_event(VK_RIGHT & 0xff, 0, KEYEVENTF_KEYUP, 0);
-	}
+	qDebug() << "onTap: mouse event";
+	mouse_event(MOUSEEVENTF_LEFTDOWN, static_cast<int>(x), 
+		static_cast<int>(y), 0, 0);
+	mouse_event(MOUSEEVENTF_LEFTUP, static_cast<int>(x), 
+		static_cast<int>(y), 0, 0);
 }
 
 void PresenterHelper::onSwipe(BYTE code)
 {
-	if (0 < nbSwipes)
-	{
-		if (0 == swipeCounter)
-		{
-			swipeCounter = nbSwipes;
-		}
-		if (1 == swipeCounter)
-		{
-			keybd_event(code & 0xff, 0, 0, 0);
-			keybd_event(code & 0xff, 0, KEYEVENTF_KEYUP, 0);
-			swipeCounter = 0;
-		}
-		else
-		{
-			--swipeCounter;
-		}
-	}
+	keybd_event(code & 0xff, 0, 0, 0);
+	keybd_event(code & 0xff, 0, KEYEVENTF_KEYUP, 0);
 }
 
 void PresenterHelper::onShowCoords(int x, int y)
@@ -236,8 +210,6 @@ void PresenterHelper::loadSettings()
 	offsetX = settings.value(KEY_OFFSET_X, OFFSET_X).toInt();
 	offsetY = settings.value(KEY_OFFSET_Y, OFFSET_Y).toInt();
 	scaleFactor = settings.value(SCALE_FACTOR, SCALE_FACTOR_x100/100.0).toDouble();
-	nbSwipes = settings.value(NB_SWIPES, NB_SWIPES_PER_PAGE_SWITCH).toInt();
-	tapForForwardSwitch = settings.value(TAP_FOR_FORWARD_SWITCH, false).toBool();
 	useKalmanFilter = settings.value(USE_KALMAN_FILTER, true).toBool();
 }
 
@@ -249,7 +221,5 @@ void PresenterHelper::saveSettings()
 	settings.setValue(KEY_OFFSET_X, offsetX);
 	settings.setValue(KEY_OFFSET_Y, offsetY);
 	settings.setValue(SCALE_FACTOR, scaleFactor);
-	settings.setValue(NB_SWIPES, nbSwipes);
-	settings.setValue(TAP_FOR_FORWARD_SWITCH, tapForForwardSwitch);
 	settings.setValue(USE_KALMAN_FILTER, useKalmanFilter);
 }
