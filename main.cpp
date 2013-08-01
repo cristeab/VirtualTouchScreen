@@ -2,7 +2,7 @@
 #include <QSplashScreen>
 #include <QDebug>
 #include <QPainter>
-#include "PresenterHelper.h"
+#include "VirtualTouchScreen.h"
 
 int main(int argc, char *argv[])
 {

@@ -6,8 +6,8 @@
 #include <QAction>
 #include <QSettings>
 #include "GestureThread.h"
-#include "PresenterHelper.h"
-#include "ConfigDialog.h"
+#include "VirtualTouchScreen.h"
+//#include "ConfigDialog.h"
 
 #define APPLICATION_NAME "Presenter Helper"
 
@@ -38,7 +38,7 @@ PresenterHelper::PresenterHelper(QWidget *parent)
 	scrWidth = geom.width();
 	scrHeight = geom.height();
 
-	config = new ConfigDialog(NULL, this);//screen size must be set
+	//config = new ConfigDialog(NULL, this);//screen size must be set
 
 	initKalman();
 	setupActions();
@@ -84,7 +84,7 @@ void PresenterHelper::showMenu()
 {
 	if (NULL != config)
 	{
-		config->show();
+		//config->show();
 		showCoords = true;
 	}
 }
@@ -180,7 +180,7 @@ void PresenterHelper::onSwipe(BYTE code)
 
 void PresenterHelper::onShowCoords(int x, int y)
 {
-	config->showCoords(x, y);
+	//config->showCoords(x, y);
 }
 
 void PresenterHelper::loadPointer(const QString &path, int size)

@@ -1,6 +1,6 @@
 #include <QMessageBox>
 #include <QDebug>
-#include "PresenterHelper.h"
+#include "VirtualTouchScreen.h"
 #include "GestureThread.h"
 
 class MyPipeline : public UtilPipeline
