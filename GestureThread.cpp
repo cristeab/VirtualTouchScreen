@@ -99,40 +99,22 @@ void GestureThread::run()
 				double imgY = static_cast<double>(handNode.positionImage.y);
 				double depth = static_cast<double>(handNode.positionWorld.y);
 
-				if ((0 < mainWnd->imgWidth) && (0 < mainWnd->imgHeight))
-				{
-					imgX = (imgX*mainWnd->scrWidth)/mainWnd->imgWidth;
-					imgY = (imgY*mainWnd->scrHeight)/mainWnd->imgHeight;
-				} else
-				{
-					qDebug() << "either image width or image height are not initialized";
-				}
-				//invert X axis
-				imgX = mainWnd->scrWidth-imgX;
-				//apply corrections as needed
-				imgX = mainWnd->scaleFactor*(imgX-mainWnd->offsetX);
-				imgY = mainWnd->scaleFactor*(imgY-mainWnd->offsetY);
-				//threshold both coordinates
-				if (0 > imgX) imgX = 0.0;
-				else if (mainWnd->scrWidth < imgX) imgX = mainWnd->scrWidth-10;
-				if (0 > imgY) imgY = 0;
-				else if (mainWnd->scrHeight < imgY) imgY = mainWnd->scrHeight-10;
 				//move cursor to the new position
 				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << imgX << "," << imgY << "," << depth << ")";
 				int x = static_cast<int>(imgX);
 				int y = static_cast<int>(imgY);
 				//emit moveCursor(x, y);//TODO: no window movement
 				//check for tap
-				if(GestureAlgos::isTap(depth))
+				if(mainWnd->gestureAlgos->isTap(depth))
 				{
 					qDebug() << "tap detected";
 					emit tap(x, y);
 				}
 				//display coordinates if requested
-				if (mainWnd->showCoords)
+				/*if (mainWnd->showCoords)
 				{
 					emit showCoords(x, y);
-				}
+				}*/
 				//check hand status
 				switch (handNode.opennessState)
 				{

@@ -6,6 +6,7 @@
 #include <QAction>
 #include <QSettings>
 #include "GestureThread.h"
+#include "GestureAlgos.h"
 #include "VirtualTouchScreen.h"
 //#include "ConfigDialog.h"
 
@@ -14,16 +15,11 @@
 PresenterHelper::PresenterHelper(QWidget *parent)
 	: QMainWindow(parent),
 	gestureThread(NULL),
-	scrWidth(0), scrHeight(0),
 	imgWidth(0), imgHeight(0),
 	pointerSize(POINTER_SIZE),
 	offsetX(OFFSET_X), offsetY(OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
-	KF(cv::KalmanFilter(4, 2, 0)),
-	measurement(cv::Mat_<float>(2,1)),
-	config(NULL),
-	showCoords(false),
-	useKalmanFilter(true)
+	config(NULL)
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 
@@ -33,12 +29,13 @@ PresenterHelper::PresenterHelper(QWidget *parent)
 	//get screen size
 	QDesktopWidget *desktop = QApplication::desktop();
 	QRect geom = desktop->availableGeometry(0);//first screen
-	scrWidth = geom.width();
-	scrHeight = geom.height();
+
+	//init gesture algosithms
+	gestureAlgos = GestureAlgos::instance();
+	gestureAlgos->setScreenSize(geom.width(), geom.height());
 
 	//config = new ConfigDialog(NULL, this);//screen size must be set
 
-	initKalman();
 	setupActions();
 
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
@@ -83,7 +80,6 @@ void PresenterHelper::showMenu()
 	if (NULL != config)
 	{
 		//config->show();
-		showCoords = true;
 	}
 }
 
@@ -125,14 +121,14 @@ void PresenterHelper::showHelp()
 
 void PresenterHelper::onMoveCursor(int x, int y)
 {
-	if (useKalmanFilter) {
-		//filter position
-		KF.predict();
-		measurement(0) = x;
-		measurement(1) = y;
-		cv::Mat estimated = KF.correct(measurement);
-		x = static_cast<int>(estimated.at<float>(0));
-		y = static_cast<int>(estimated.at<float>(1));
+	//filter position
+	float fx = x;
+	float fy = y;
+	if (EXIT_SUCCESS == gestureAlgos->filterKalman(fx, fy)) {
+		x = static_cast<int>(fx);
+		y = static_cast<int>(fy);
+	} else {
+		qDebug() << "Error when using the Kalman filter";
 	}
 	move(x, y);
 }
@@ -177,21 +173,6 @@ void PresenterHelper::loadPointer(const QString &path, int size)
 	}
 }
 
-void PresenterHelper::initKalman()
-{
-	//setup Kalman filter
-	measurement.setTo(cv::Scalar(0));
-	KF.statePre.at<float>(0) = scrWidth/2.0;
-	KF.statePre.at<float>(1) = scrHeight/2.0;
-	KF.statePre.at<float>(2) = 0;
-	KF.statePre.at<float>(3) = 0;
-	KF.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
-	setIdentity(KF.measurementMatrix);
-	setIdentity(KF.processNoiseCov, cv::Scalar::all(1e-4));
-	setIdentity(KF.measurementNoiseCov, cv::Scalar::all(1e-1));
-	setIdentity(KF.errorCovPost, cv::Scalar::all(.1));
-}
-
 #define COMPANY_NAME "Bogdan Cristea"
 #define POINTER_ICON_PATH "PointerIconPath"
 #define KEY_POINTER_SIZE "PointerSize"
@@ -210,7 +191,6 @@ void PresenterHelper::loadSettings()
 	offsetX = settings.value(KEY_OFFSET_X, OFFSET_X).toInt();
 	offsetY = settings.value(KEY_OFFSET_Y, OFFSET_Y).toInt();
 	scaleFactor = settings.value(SCALE_FACTOR, SCALE_FACTOR_x100/100.0).toDouble();
-	useKalmanFilter = settings.value(USE_KALMAN_FILTER, true).toBool();
 }
 
 void PresenterHelper::saveSettings()
@@ -221,5 +201,4 @@ void PresenterHelper::saveSettings()
 	settings.setValue(KEY_OFFSET_X, offsetX);
 	settings.setValue(KEY_OFFSET_Y, offsetY);
 	settings.setValue(SCALE_FACTOR, scaleFactor);
-	settings.setValue(USE_KALMAN_FILTER, useKalmanFilter);
 }

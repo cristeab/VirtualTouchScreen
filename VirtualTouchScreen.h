@@ -3,10 +3,10 @@
 
 #include <QtWidgets/QMainWindow>
 #include <Windows.h>
-#include "opencv2/video/tracking.hpp"
 #include "util_pipeline.h"
 
 class GestureThread;
+class GestureAlgos;
 class ConfigDialog;
 
 class PresenterHelper : public QMainWindow
@@ -32,13 +32,11 @@ public slots:
 
 private:
 	void setupActions();
-	void initKalman();
 	void loadPointer(const QString &path, int size);
 	void loadSettings();
 	void saveSettings();
 	GestureThread *gestureThread;
-	int scrWidth;
-	int scrHeight;
+	GestureAlgos *gestureAlgos;
 	pxcU32 imgWidth;
 	pxcU32 imgHeight;
 	QString pointerIconPath;
@@ -46,11 +44,7 @@ private:
 	int offsetX;
 	int offsetY;
 	double scaleFactor;
-	cv::KalmanFilter KF;
-    cv::Mat_<float> measurement;
 	ConfigDialog *config;
-	bool showCoords;
-	bool useKalmanFilter;
 };
 
 #endif // PresenterHelper_H
