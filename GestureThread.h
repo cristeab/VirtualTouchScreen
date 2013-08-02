@@ -20,8 +20,6 @@ signals:
 	void showCoords(int x, int y);
 private:
 	void setupPipeline();
-	bool isTap(double in);
-	enum {MAX_OBS_DURATION = 15, MAX_NB_SAMPLES = 2};
 	MyPipeline *pipeline;
 	PXCGesture * gesture;
 	PresenterHelper *mainWnd;

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include "VirtualTouchScreen.h"
 #include "GestureThread.h"
+#include "GestureAlgos.h"
 
 class MyPipeline : public UtilPipeline
 {
@@ -28,6 +29,38 @@ public:
 			{
 				pres->onSwipe(VK_LEFT);
 			}
+			break;
+		default:
+			(void)0;
+		}
+	}
+	void PXCAPI OnAlert(PXCGesture::Alert *alert)
+	{
+		switch (alert->label)
+		{
+		case PXCGesture::Alert::LABEL_FOV_BOTTOM:
+			qDebug() << "The tracking object touches the bottom field of view";
+			break;
+		case PXCGesture::Alert::LABEL_FOV_LEFT:
+			qDebug() << "The tracking object touches the left field of view";
+			break;
+		case PXCGesture::Alert::LABEL_FOV_RIGHT:
+			qDebug() << "The tracking object touches the right field of view";
+			break;
+		case PXCGesture::Alert::LABEL_FOV_TOP:
+			qDebug() << "The tracking object touches the top field of view";
+			break;
+		case PXCGesture::Alert::LABEL_FOV_OK:
+			qDebug() << "The tracking object is within field of view";
+			break;
+		case PXCGesture::Alert::LABEL_FOV_BLOCKED:
+			qDebug() << "The field of view is blocked";
+			break;
+		case PXCGesture::Alert::LABEL_GEONODE_ACTIVE:
+			qDebug() << "The tracking object is found";
+			break;
+		case PXCGesture::Alert::LABEL_GEONODE_INACTIVE:
+			qDebug() << "The tracking object is lost";
 			break;
 		default:
 			(void)0;
@@ -88,9 +121,9 @@ void GestureThread::run()
 				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << imgX << "," << imgY << "," << depth << ")";
 				int x = static_cast<int>(imgX);
 				int y = static_cast<int>(imgY);
-				emit moveCursor(x, y);
+				//emit moveCursor(x, y);//TODO: no window movement
 				//check for tap
-				if(isTap(depth))
+				if(GestureAlgos::isTap(depth))
 				{
 					qDebug() << "tap detected";
 					emit tap(x, y);
@@ -100,63 +133,24 @@ void GestureThread::run()
 				{
 					emit showCoords(x, y);
 				}
+				//check hand status
+				switch (handNode.opennessState)
+				{
+				case PXCGesture::GeoNode::Openness::LABEL_OPEN:
+					qDebug() << "hand open";
+					break;
+				case PXCGesture::GeoNode::Openness::LABEL_CLOSE:
+					qDebug() << "hand closed";
+					break;
+				default:
+					(void)0;
+				}
 			}
 
 			// we must release the frame
 			pipeline->ReleaseFrame();
 		}
 	}
-}
-
-bool GestureThread::isTap(double samp)
-{
-	static double prevSamp = 0.0;
-	static int obsDuration = 0;
-	static int varSign = 0;
-	static int nbSignSamp = 0;
-
-	bool out = false;
-	double diffSamp = samp-prevSamp;
-
-	if (qAbs(diffSamp) > 0.05)
-	{
-		int sign = static_cast<int>((diffSamp)/qAbs(diffSamp));
-		if (0 == varSign)
-		{
-			varSign = sign;
-			obsDuration = 0;
-			nbSignSamp = 0;
-		}
-		else if (varSign == sign)
-		{
-			obsDuration = 0;
-			++nbSignSamp;
-		}
-		else
-		{
-			if (MAX_NB_SAMPLES < nbSignSamp)
-			{
-				out = true;
-				obsDuration = 0;
-				varSign = 0;
-			}
-			nbSignSamp = 0;
-		}
-	}
-	prevSamp = samp;
-
-	if (0 != varSign)
-	{
-		++obsDuration;
-	}
-	if (MAX_OBS_DURATION < obsDuration)
-	{
-		obsDuration = 0;
-		varSign = 0;
-		nbSignSamp = 0;
-	}
-
-	return out;
 }
 
 void GestureThread::setupPipeline()
