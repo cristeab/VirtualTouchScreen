@@ -84,7 +84,59 @@ int GestureAlgos::filterKalman(float &x, float &y)
 	return rc;
 }
 
-bool GestureAlgos::isTap(double samp)
+void GestureAlgos::initBiquad()
+{
+	sos_mat_[0][0] = 1.0, sos_mat_[0][1] = 1.0, sos_mat_[0][2] = 0.0, sos_mat_[0][3] = 1.0, 
+		sos_mat_[0][4] = 0.1584, sos_mat_[0][5] = 0.0;
+    sos_mat_[1][0] = 1.0, sos_mat_[1][1] = 2.0, sos_mat_[1][2] = 1.0, sos_mat_[1][3] = 1.0, 
+		sos_mat_[1][4] = 0.3264, sos_mat_[1][5] = 0.0561;
+    sos_mat_[2][0] = 1.0, sos_mat_[2][1] = 2.0, sos_mat_[2][2] = 1.0, sos_mat_[2][3] = 1.0,
+		sos_mat_[2][4] = 0.3575, sos_mat_[2][5] = 0.1570;
+    sos_mat_[3][0] = 1.0, sos_mat_[3][1] = 2.0, sos_mat_[3][2] = 1.0, sos_mat_[3][3] = 1.0,
+		sos_mat_[3][4] = 0.4189, sos_mat_[3][5] = 0.3554;
+    sos_mat_[4][0] = 1.0, sos_mat_[4][1] = 2.0, sos_mat_[4][2] = 1.0, sos_mat_[4][3] = 1.0,
+		sos_mat_[4][4] = 0.5304, sos_mat_[4][5] = 0.7165;
+	gain_ = 0.0189;
+	for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
+		biquadState[n].index = n;
+		memset(biquadState[n].mem_in, 0, sizeof(biquadState[n].mem_in));
+		memset(biquadState[n].mem_out, 0, sizeof(biquadState[n].mem_out));
+	}
+}
+
+double GestureAlgos::biquad(BiquadState *state, double in)
+{
+	//filter output
+	double out = sos_mat_[state->index][0]*in + 
+		sos_mat_[state->index][1]*state->mem_in[0] + 
+		sos_mat_[state->index][2]*state->mem_in[1] -
+		sos_mat_[state->index][4]*state->mem_out[0] -
+		sos_mat_[state->index][5]*state->mem_out[1];
+	out = out/sos_mat_[state->index][3];
+	//filter memory
+	state->mem_in[1] = state->mem_in[0];
+	state->mem_in[0] = in;
+	state->mem_out[1] = state->mem_out[0];
+	state->mem_out[0] = out;
+	return out;
+}
+
+int GestureAlgos::filterBiquad(float &depth)
+{
+	static bool initDone = false;
+	if (!initDone) {
+		initBiquad();
+		initDone = true;
+	}
+	//cascade of biquads
+	for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
+		depth = biquad(biquadState+n, depth);
+	}
+	depth = gain_*depth;
+	return EXIT_SUCCESS;
+}
+
+bool GestureAlgos::isTap(int x, int y, float depth)
 {
 	static double prevSamp = 0.0;
 	static int obsDuration = 0;
@@ -92,7 +144,7 @@ bool GestureAlgos::isTap(double samp)
 	static int nbSignSamp = 0;
 
 	bool out = false;
-	double diffSamp = samp-prevSamp;
+	double diffSamp = depth-prevSamp;
 
 	if (qAbs(diffSamp) > 0.05)
 	{
@@ -119,7 +171,7 @@ bool GestureAlgos::isTap(double samp)
 			nbSignSamp = 0;
 		}
 	}
-	prevSamp = samp;
+	prevSamp = depth;
 
 	if (0 != varSign)
 	{
@@ -135,7 +187,22 @@ bool GestureAlgos::isTap(double samp)
 	return out;
 }
 
-bool GestureAlgos::isPressAndHold(int x, int y, double depth)
+bool GestureAlgos::isPressAndHold(int x, int y, float depth)
+{
+	return false;
+}
+
+bool GestureAlgos::isSlide(int x, int y, float depth)
+{
+	return false;
+}
+
+bool GestureAlgos::isPinch(int x, int y, float depth)
+{
+	return false;
+}
+
+bool GestureAlgos::isStretch(int x, int y, float depth)
 {
 	return false;
 }

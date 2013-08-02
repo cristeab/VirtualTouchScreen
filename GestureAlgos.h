@@ -28,12 +28,31 @@ public:
 		offsetX_ = offsetX;
 		offsetY_ = offsetY;
 	}
+	//used to filter hand coordinates
 	int filterKalman(float &x, float &y);
-	bool isTap(double samp);
-	bool isPressAndHold(int x, int y, double depth);
+	//used to filter depth information
+	int filterBiquad(float &depth);
+	//gestures
+	bool isTap(int x, int y, float depth);
+	bool isPressAndHold(int x, int y, float depth);
+	bool isSlide(int x, int y, float depth);
+	bool isPinch(int x, int y, float depth);
+	bool isStretch(int x, int y, float depth);
+	//swipe, swipe from edge and turn are implemented in GestureThread
 private:
 	int initKalman();
 	int imageToScreen(float &x, float &y);
+	struct BiquadState {
+		unsigned int index;
+		double mem_in[2];
+		double mem_out[2];
+	};
+	double biquad(BiquadState *state, double in);
+	void initBiquad();
+	enum SosMat {NB_BIQUADS = 5};
+	double sos_mat_[SosMat::NB_BIQUADS][6];
+	double gain_;
+	BiquadState biquadState[SosMat::NB_BIQUADS];
 	enum {MAX_OBS_DURATION = 15, MAX_NB_SAMPLES = 2};
 	int scrWidth_;
 	int scrHeight_;
