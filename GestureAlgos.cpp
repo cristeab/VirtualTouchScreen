@@ -143,13 +143,13 @@ void GestureAlgos::filterDiff(float &depth)
 
 bool GestureAlgos::isTap(int x, int y, float depth)
 {
-	static double prevSamp = 0.0;
 	static int obsDuration = 0;
 	static int varSign = 0;
 	static int nbSignSamp = 0;
 
 	bool out = false;
-	double diffSamp = depth-prevSamp;
+	float diffSamp = depth;
+	filterDiff(diffSamp);
 
 	if (qAbs(diffSamp) > 0.05)
 	{
@@ -176,7 +176,6 @@ bool GestureAlgos::isTap(int x, int y, float depth)
 			nbSignSamp = 0;
 		}
 	}
-	prevSamp = depth;
 
 	if (0 != varSign)
 	{
