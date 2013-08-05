@@ -71,8 +71,6 @@ int GestureAlgos::filterKalman(float &x, float &y)
 		initDone = true;
 	}
 
-	int rc = imageToScreen(x, y);
-
 	KF_.predict();
 	measurement_(0) = x;
 	measurement_(1) = y;
@@ -80,7 +78,7 @@ int GestureAlgos::filterKalman(float &x, float &y)
 	x = static_cast<int>(estimated.at<float>(0));
 	y = static_cast<int>(estimated.at<float>(1));
 
-	return rc;
+	return EXIT_SUCCESS;
 }
 
 void GestureAlgos::initBiquad()

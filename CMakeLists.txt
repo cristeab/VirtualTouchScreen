@@ -40,6 +40,9 @@ target_link_libraries (${CMAKE_PROJECT_NAME} Qt5::WinMain ${PCSDK_LIBS} ${OpenCV
 
 qt5_use_modules (${CMAKE_PROJECT_NAME} Widgets)
 
+#add unit tests
+ADD_SUBDIRECTORY(tests)
+
 install(TARGETS VirtualTouchScreen RUNTIME DESTINATION .)
 install(FILES ${CMAKE_SOURCE_DIR}/icons/VirtualTouchScreen.ico DESTINATION .)
 install(FILES ${CMAKE_SOURCE_DIR}/README.md DESTINATION .)

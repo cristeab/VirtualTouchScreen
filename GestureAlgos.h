@@ -10,6 +10,7 @@ public:
 		static GestureAlgos instance;
 		return &instance;
 	}
+	//algorithms parameters
 	void setScreenSize(int scrWidth, int scrHeight) {
 		scrWidth_ = scrWidth;
 		scrHeight_ = scrHeight;
@@ -23,6 +24,8 @@ public:
 		offsetX_ = offsetX;
 		offsetY_ = offsetY;
 	}
+	//transforms to screen coordinates
+	int imageToScreen(float &x, float &y);
 	//filters
 	int filterKalman(float &x, float &y);
 	void filterBiquad(float &depth);
@@ -36,7 +39,6 @@ public:
 	//swipe, swipe from edge and turn are implemented in GestureThread
 private:
 	int initKalman();
-	int imageToScreen(float &x, float &y);
 	struct BiquadState {
 		unsigned int index;
 		double mem_in[2];
