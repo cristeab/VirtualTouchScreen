@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	splashScr.showMessage("Initializing gesture camera ...");
 	a.processEvents();
 
-	PresenterHelper w;
+	VirtualTouchScreen w;
 	w.show();
 
 	splashScr.finish(&w);

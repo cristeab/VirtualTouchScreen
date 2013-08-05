@@ -1,5 +1,5 @@
-#ifndef PresenterHelper_H
-#define PresenterHelper_H
+#ifndef VirtualTouchScreen_H
+#define VirtualTouchScreen_H
 
 #include <QtWidgets/QMainWindow>
 #include <Windows.h>
@@ -9,14 +9,14 @@ class GestureThread;
 class GestureAlgos;
 class ConfigDialog;
 
-class PresenterHelper : public QMainWindow
+class VirtualTouchScreen : public QMainWindow
 {
 	Q_OBJECT
 	friend class GestureThread;
 	friend class ConfigDialog;
 public:
-	explicit PresenterHelper(QWidget *parent = 0);
-	~PresenterHelper();
+	explicit VirtualTouchScreen(QWidget *parent = 0);
+	~VirtualTouchScreen();
 	enum {OFFSET_X = 200, OFFSET_Y = 100, 
 		SCALE_FACTOR_x100 = 100,
 		NB_SWIPES_PER_PAGE_SWITCH = 1,
@@ -47,4 +47,4 @@ private:
 	ConfigDialog *config;
 };
 
-#endif // PresenterHelper_H
+#endif // VirtualTouchScreen_H

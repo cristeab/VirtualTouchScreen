@@ -4,13 +4,13 @@
 #include "util_pipeline.h"
 
 class MyPipeline;
-class PresenterHelper;
+class VirtualTouchScreen;
 
 class GestureThread : public QThread
 {
 	Q_OBJECT
 public:
-	explicit GestureThread(PresenterHelper *obj);
+	explicit GestureThread(VirtualTouchScreen *obj);
 	~GestureThread();
 protected:
 	void run();
@@ -22,5 +22,5 @@ private:
 	void setupPipeline();
 	MyPipeline *pipeline;
 	PXCGesture * gesture;
-	PresenterHelper *mainWnd;
+	VirtualTouchScreen *mainWnd;
 };

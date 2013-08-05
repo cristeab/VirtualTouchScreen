@@ -12,7 +12,7 @@
 
 #define APPLICATION_NAME "Virtual Touch Screen"
 
-PresenterHelper::PresenterHelper(QWidget *parent)
+VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	: QMainWindow(parent),
 	gestureThread(NULL),
 	imgWidth(0), imgHeight(0),
@@ -43,7 +43,7 @@ PresenterHelper::PresenterHelper(QWidget *parent)
 	gestureThread->start();
 }
 
-PresenterHelper::~PresenterHelper()
+VirtualTouchScreen::~VirtualTouchScreen()
 {
 	gestureThread->terminate();
 	gestureThread->wait();
@@ -52,7 +52,7 @@ PresenterHelper::~PresenterHelper()
 	saveSettings();
 }
 
-void PresenterHelper::setupActions()
+void VirtualTouchScreen::setupActions()
 {
 	QAction *menuAction = new QAction(this);
 	menuAction->setShortcut(QKeySequence("F2"));
@@ -75,7 +75,7 @@ void PresenterHelper::setupActions()
 	addAction(hideAction);
 }
 
-void PresenterHelper::showMenu()
+void VirtualTouchScreen::showMenu()
 {
 	if (NULL != config)
 	{
@@ -83,7 +83,7 @@ void PresenterHelper::showMenu()
 	}
 }
 
-void PresenterHelper::showHelp()
+void VirtualTouchScreen::showHelp()
 {
 	QMessageBox::about(NULL, APPLICATION_NAME, 
 		"                            Presenter Helper\n\n"
@@ -119,7 +119,7 @@ void PresenterHelper::showHelp()
 		"the application icon on the main toolbar or click the pointer.");
 }
 
-void PresenterHelper::onMoveCursor(int x, int y)
+void VirtualTouchScreen::onMoveCursor(int x, int y)
 {
 	//filter position
 	float fx = x;
@@ -133,7 +133,7 @@ void PresenterHelper::onMoveCursor(int x, int y)
 	move(x, y);
 }
 
-void PresenterHelper::onTap(int x, int y)
+void VirtualTouchScreen::onTap(int x, int y)
 {
 	qDebug() << "onTap: mouse event";
 	mouse_event(MOUSEEVENTF_LEFTDOWN, static_cast<int>(x), 
@@ -142,18 +142,18 @@ void PresenterHelper::onTap(int x, int y)
 		static_cast<int>(y), 0, 0);
 }
 
-void PresenterHelper::onSwipe(BYTE code)
+void VirtualTouchScreen::onSwipe(BYTE code)
 {
 	keybd_event(code & 0xff, 0, 0, 0);
 	keybd_event(code & 0xff, 0, KEYEVENTF_KEYUP, 0);
 }
 
-void PresenterHelper::onShowCoords(int x, int y)
+void VirtualTouchScreen::onShowCoords(int x, int y)
 {
 	//config->showCoords(x, y);
 }
 
-void PresenterHelper::loadPointer(const QString &path, int size)
+void VirtualTouchScreen::loadPointer(const QString &path, int size)
 {
 	QPixmap pix(path);
 	if ((size != pix.size().width()) && (0 < size))
@@ -183,7 +183,7 @@ void PresenterHelper::loadPointer(const QString &path, int size)
 #define TAP_FOR_FORWARD_SWITCH "TapForForwardSwitch"
 #define USE_KALMAN_FILTER "UseKalmanFilter"
 
-void PresenterHelper::loadSettings()
+void VirtualTouchScreen::loadSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	pointerIconPath = settings.value(POINTER_ICON_PATH, ":/icons/green-pointer.png").toString();
@@ -193,7 +193,7 @@ void PresenterHelper::loadSettings()
 	scaleFactor = settings.value(SCALE_FACTOR, SCALE_FACTOR_x100/100.0).toDouble();
 }
 
-void PresenterHelper::saveSettings()
+void VirtualTouchScreen::saveSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	settings.setValue(POINTER_ICON_PATH, pointerIconPath);

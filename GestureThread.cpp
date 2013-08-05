@@ -7,7 +7,7 @@
 class MyPipeline : public UtilPipeline
 {
 public:
-	explicit MyPipeline(PresenterHelper *p) : UtilPipeline(), pres(p)
+	explicit MyPipeline(VirtualTouchScreen *p) : UtilPipeline(), pres(p)
 	{
 		//for some reason only default values are accepted
 		//EnableImage(PXCImage::IMAGE_TYPE_DEPTH, 320, 240);
@@ -67,10 +67,10 @@ public:
 		}
 	}
 private:
-	PresenterHelper *pres;
+	VirtualTouchScreen *pres;
 };
 
-GestureThread::GestureThread(PresenterHelper *obj) : QThread(), mainWnd(obj)
+GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(), mainWnd(obj)
 {
 	setupPipeline();
 	connect(this, SIGNAL(moveCursor(int,int)), mainWnd, SLOT(onMoveCursor(int,int)));
@@ -105,7 +105,7 @@ void GestureThread::run()
 				int y = static_cast<int>(imgY);
 				//emit moveCursor(x, y);//TODO: no window movement
 				//check for tap
-				if(mainWnd->gestureAlgos->isTap(depth))
+				if(mainWnd->gestureAlgos->isTap(x, y, depth))
 				{
 					qDebug() << "tap detected";
 					emit tap(x, y);
