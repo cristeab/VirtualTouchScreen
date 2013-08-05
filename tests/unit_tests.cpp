@@ -7,10 +7,10 @@ class TestGestureAlgos: public QObject
 {
     Q_OBJECT
 private slots:
-    void imageToScreen();
+    void imageToScreenFilterKalman();
 };
 
-void TestGestureAlgos::imageToScreen()
+void TestGestureAlgos::imageToScreenFilterKalman()
 {
 	GestureAlgos *algos = GestureAlgos::instance();
 	QVERIFY(NULL != algos);
@@ -19,14 +19,18 @@ void TestGestureAlgos::imageToScreen()
 	QVERIFY(EXIT_FAILURE == algos->filterKalman(x, y));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(x, y));
 	algos->setScreenSize(1024, 768);
-	QVERIFY(EXIT_FAILURE == algos->filterKalman(x, y));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(x, y));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(x, y));
 	algos->setImageSize(320, 240);
-	QVERIFY(EXIT_FAILURE == algos->filterKalman(x, y));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(x, y));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(x, y));
 	algos->setCorrectionFactors(1.0, 0, 0);
 	QVERIFY(EXIT_SUCCESS == algos->filterKalman(x, y));
+	x = 0;
+	y = 0;
 	QVERIFY(EXIT_SUCCESS == algos->imageToScreen(x, y));
+	QVERIFY(1024.0 == x);
+	QVERIFY(0.0 == y);
 }
 
 QTEST_MAIN(TestGestureAlgos)

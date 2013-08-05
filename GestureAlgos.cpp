@@ -45,7 +45,7 @@ int GestureAlgos::imageToScreen(float &x, float &y)
 	//invert X axis
 	x = scrWidth_-x;
 	//apply corrections as needed
-	if ((0 < scaleFactor_) && (0 < offsetX_) && (0 < offsetY_)) {
+	if ((0 < scaleFactor_) && (0 <= offsetX_) && (0 <= offsetY_)) {
 		x = scaleFactor_*(x-offsetX_);
 		y = scaleFactor_*(y-offsetY_);
 	} else {
