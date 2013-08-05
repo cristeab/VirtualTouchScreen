@@ -7,13 +7,8 @@ class GestureAlgos
 public:
 	GestureAlgos();
 	static GestureAlgos* instance() {
-		if (NULL == instance_) {
-			instance_ = new GestureAlgos();
-		}
-		return instance_;
-	}
-	~GestureAlgos() {
-		delete instance_;
+		static GestureAlgos instance;
+		return &instance;
 	}
 	void setScreenSize(int scrWidth, int scrHeight) {
 		scrWidth_ = scrWidth;
@@ -64,7 +59,7 @@ private:
 	int offsetY_;
 	cv::KalmanFilter KF_;
 	cv::Mat_<float> measurement_;
-	static GestureAlgos *instance_;
 	GestureAlgos(const GestureAlgos&);
 	GestureAlgos& operator=(const GestureAlgos&);
+	~GestureAlgos() {};
 };

@@ -2,8 +2,6 @@
 #include <QDebug>
 #include "GestureAlgos.h"
 
-GestureAlgos *GestureAlgos::instance_ = NULL;
-
 GestureAlgos::GestureAlgos() : diffState_(0.0),
 	scrWidth_(0), scrHeight_(0),
 	imgWidth_(0), imgHeight_(0),
