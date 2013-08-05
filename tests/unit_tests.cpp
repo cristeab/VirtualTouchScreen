@@ -9,6 +9,7 @@ class TestGestureAlgos: public QObject
 private slots:
     void imageToScreenFilterKalman();
 	void filterBiquad();
+	void filterDiff();
 };
 
 void TestGestureAlgos::imageToScreenFilterKalman()
@@ -61,6 +62,21 @@ void TestGestureAlgos::filterBiquad()
 		sum += abs(val*val);
 	}
 	QVERIFY(fabs(1.58709 - sum) < TOL);
+}
+
+void TestGestureAlgos::filterDiff()
+{
+	GestureAlgos *algos = GestureAlgos::instance();
+	QVERIFY(NULL != algos);
+
+	float s = static_cast<float>(0);
+	algos->filterDiff(s);
+	QVERIFY(0 == s);
+	s = static_cast<float>(1.0);
+	algos->filterDiff(s);
+	QVERIFY(1.0 == s);
+	algos->filterDiff(s);
+	QVERIFY(0 == s);
 }
 
 QTEST_MAIN(TestGestureAlgos)
