@@ -4,7 +4,8 @@
 
 GestureAlgos *GestureAlgos::instance_ = NULL;
 
-GestureAlgos::GestureAlgos() : scrWidth_(0), scrHeight_(0),
+GestureAlgos::GestureAlgos() : diffState_(0.0),
+	scrWidth_(0), scrHeight_(0),
 	imgWidth_(0), imgHeight_(0),
 	scaleFactor_(0.0), offsetX_(0), offsetY_(0),
 	KF_(cv::KalmanFilter(4, 2, 0)),
@@ -53,7 +54,7 @@ int GestureAlgos::imageToScreen(float &x, float &y)
 		qDebug() << "correction factors have not been initialized";
 		rc = EXIT_FAILURE;
 	}
-	//threshold both coordinates
+	//threshold coordinates
 	if (0 > x) x = 0.0;
 	else if (scrWidth_ < x) x = scrWidth_-10;
 	if (0 > y) y = 0;
@@ -121,7 +122,7 @@ double GestureAlgos::biquad(BiquadState *state, double in)
 	return out;
 }
 
-int GestureAlgos::filterBiquad(float &depth)
+void GestureAlgos::filterBiquad(float &depth)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -132,8 +133,14 @@ int GestureAlgos::filterBiquad(float &depth)
 	for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
 		depth = biquad(biquadState+n, depth);
 	}
-	depth = gain_*depth;
-	return EXIT_SUCCESS;
+	depth = static_cast<float>(gain_*depth);
+}
+
+void GestureAlgos::filterDiff(float &depth)
+{
+	float tmp = depth;
+	depth -= diffState_;
+	diffState_ = tmp;
 }
 
 bool GestureAlgos::isTap(int x, int y, float depth)
