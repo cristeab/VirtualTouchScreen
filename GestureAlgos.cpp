@@ -39,7 +39,7 @@ int GestureAlgos::imageToScreen(float &x, float &y)
 		x = (x*scrWidth_)/imgWidth_;
 		y = (y*scrHeight_)/imgHeight_;
 	} else {
-		qDebug() << "either image width or image height are not initialized";
+		qDebug() << "either image width or image height is not initialized";
 		rc = EXIT_FAILURE;
 	}
 	//invert X axis
@@ -255,7 +255,59 @@ bool GestureAlgos::isPressAndHold(int x, int y, float depth)
 
 bool GestureAlgos::isSlide(int x, int y, float depth)
 {
-	return false;
+	//constants
+	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.015);
+	const static int DIFF_POS_THRESHOLD = 20;
+	const static int MAX_OBS_DURATION = 35;
+	//permanent variables
+	static int obsDuration = 0;
+	static bool slideDetected = false;
+	static int varSign = 0;
+	static float prevDepth = static_cast<float>(0);
+	static int prevX = 0;
+	static int prevY = 0;
+
+	bool out = false;
+
+	filterDiff(depth, prevDepth);
+	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
+	{
+		int sign = static_cast<int>((depth)/qAbs(depth));
+		if (0 == varSign)
+		{
+			//variation detected
+			varSign = sign;
+			obsDuration = 0;
+			slideDetected = false;
+		}
+		else if (varSign != sign)
+		{
+			//sign change detected
+			varSign = -varSign;
+			obsDuration = 0;
+			slideDetected = false;
+		}
+	}
+
+	//check the position of the hand (helps reducing the false alarms)
+	filterDiff(x, prevX);
+	filterDiff(y, prevY);
+	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
+		slideDetected = true;
+	}
+
+	if (-1 == varSign)
+	{
+		//press detected
+		++obsDuration;
+		if ((MAX_OBS_DURATION < obsDuration) && slideDetected)
+		{
+			out = true;
+			varSign = 0;
+		}
+	}
+
+	return out;
 }
 
 bool GestureAlgos::isPinch(int x, int y, float depth)

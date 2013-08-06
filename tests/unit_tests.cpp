@@ -12,6 +12,7 @@ private slots:
 	void filterDiff();
 	void isTap();
 	void isPressAndHold();
+	void isSlide();
 private:
 	int getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
 		const QString &fileName);
@@ -152,6 +153,27 @@ void TestGestureAlgos::isPressAndHold()
 		}
 	}
 	QVERIFY(4 == count);
+}
+
+void TestGestureAlgos::isSlide()
+{
+	QVector<int> x;
+	QVector<int> y;
+	QVector<float> depth;
+	QVERIFY(EXIT_SUCCESS == getData(x, y, depth, "../../tests/ULTRABOOK-BC_vts10_slide.LOG"));
+
+	GestureAlgos *algos = GestureAlgos::instance();
+	QVERIFY(NULL != algos);
+
+	//start to process from index 0 in order to detect 4 presses
+	int count = 0;
+	for (int i = 0; i < x.size(); ++i) {
+		algos->filterLowPass(depth[i]);
+		if (algos->isSlide(x[i], y[i], depth[i])) {
+			++count;
+		}
+	}
+	QVERIFY(2 == count);
 }
 
 QTEST_MAIN(TestGestureAlgos)
