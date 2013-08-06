@@ -103,7 +103,7 @@ void GestureThread::run()
 				if (EXIT_FAILURE == mainWnd->gestureAlgos->filterKalman(imgX, imgY)) {
 					qDebug() << "error in Kalman filter";
 				}
-				mainWnd->gestureAlgos->filterBiquad(depth);
+				mainWnd->gestureAlgos->filterLowPass(depth);
 
 				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << imgX << "," << imgY << "," << depth << ")";
 

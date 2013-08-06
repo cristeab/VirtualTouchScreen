@@ -8,9 +8,10 @@ class TestGestureAlgos: public QObject
     Q_OBJECT
 private slots:
     void imageToScreenFilterKalman();
-	void filterBiquad();
+	void filterLowPass();
 	void filterDiff();
 	void isTap();
+	void isPressAndHold();
 private:
 	int getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
 		const QString &fileName);
@@ -39,7 +40,7 @@ void TestGestureAlgos::imageToScreenFilterKalman()
 	QVERIFY(0.0 == y);
 }
 
-void TestGestureAlgos::filterBiquad()
+void TestGestureAlgos::filterLowPass()
 {
 	GestureAlgos *algos = GestureAlgos::instance();
 	QVERIFY(NULL != algos);
@@ -52,7 +53,7 @@ void TestGestureAlgos::filterBiquad()
 	float sum = 0;
 	for (int n = 0; n < nbSamp; ++n) {
 		val = sin(2*PI*fn*n);
-		algos->filterBiquad(val);
+		algos->filterLowPass(val);
 		sum += abs(val*val);
 	}
 	QVERIFY(fabs(48.5314 - sum) < TOL);
@@ -62,7 +63,7 @@ void TestGestureAlgos::filterBiquad()
 	sum = 0;
 	for (int n = 0; n < nbSamp; ++n) {
 		val = sin(2*PI*fn*n);
-		algos->filterBiquad(val);
+		algos->filterLowPass(val);
 		sum += abs(val*val);
 	}
 	QVERIFY(fabs(1.58709 - sum) < TOL);
@@ -123,11 +124,34 @@ void TestGestureAlgos::isTap()
 
 	//start to process from index 800 in order to detect 3 taps
 	int count = 0;
-	for (int i = 800; i < x.size(); ++i) {
-		bool tap = algos->isTap(x[i], y[i], depth[i]);
-		if (tap) ++count;
+	for (int i = 800; i < x.size(); ++i) {		
+		algos->filterLowPass(depth[i]);//apply low pass filter to depth signal
+		if (algos->isTap(x[i], y[i], depth[i])) {
+			if (850 < i) ++count; //skip transition in the filtered signal
+		}
 	}
 	QVERIFY(3 == count);
+}
+
+void TestGestureAlgos::isPressAndHold()
+{
+	QVector<int> x;
+	QVector<int> y;
+	QVector<float> depth;
+	QVERIFY(EXIT_SUCCESS == getData(x, y, depth, "../../tests/ULTRABOOK-BC_vts9_ph.LOG"));
+
+	GestureAlgos *algos = GestureAlgos::instance();
+	QVERIFY(NULL != algos);
+
+	//start to process from index 0 in order to detect 4 presses
+	int count = 0;
+	for (int i = 0; i < x.size(); ++i) {
+		algos->filterLowPass(depth[i]);
+		if (algos->isPressAndHold(x[i], y[i], depth[i])) {
+			++count;
+		}
+	}
+	QVERIFY(4 == count);
 }
 
 QTEST_MAIN(TestGestureAlgos)

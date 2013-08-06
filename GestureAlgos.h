@@ -28,7 +28,7 @@ public:
 	int imageToScreen(float &x, float &y);
 	//filters
 	int filterKalman(float &x, float &y);
-	void filterBiquad(float &depth);
+	void filterLowPass(float &depth);
 	template<typename T>
 	void filterDiff(T &depth, T &diffState);
 	//gestures

@@ -118,7 +118,7 @@ double GestureAlgos::biquad(BiquadState *state, double in)
 	return out;
 }
 
-void GestureAlgos::filterBiquad(float &depth)
+void GestureAlgos::filterLowPass(float &depth)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -201,7 +201,56 @@ bool GestureAlgos::isTap(int x, int y, float depth)
 
 bool GestureAlgos::isPressAndHold(int x, int y, float depth)
 {
-	return false;
+	//constants
+	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
+	const static int DIFF_POS_THRESHOLD = 20;
+	const static int MAX_OBS_DURATION = 50;
+	//permanent variables
+	static int obsDuration = 0;
+	static int varSign = 0;
+	static float prevDepth = static_cast<float>(0);
+	static int prevX = 0;
+	static int prevY = 0;
+
+	bool out = false;
+
+	filterDiff(depth, prevDepth);
+	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
+	{
+		int sign = static_cast<int>((depth)/qAbs(depth));
+		if (0 == varSign)
+		{
+			//variation detected
+			varSign = sign;
+			obsDuration = 0;
+		}
+		else if (varSign != sign)
+		{
+			//sign change detected
+			varSign = -varSign;
+			obsDuration = 0;
+		}
+	}
+
+	//check the position of the hand (helps reducing the false alarms)
+	filterDiff(x, prevX);
+	filterDiff(y, prevY);
+	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
+		varSign = 0;//not a tap
+	}
+
+	if (-1 == varSign)
+	{
+		//press detected
+		++obsDuration;
+		if (MAX_OBS_DURATION < obsDuration)
+		{
+			out = true;
+			varSign = 0;
+		}
+	}
+
+	return out;
 }
 
 bool GestureAlgos::isSlide(int x, int y, float depth)
