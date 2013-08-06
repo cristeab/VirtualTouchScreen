@@ -95,12 +95,19 @@ void GestureThread::run()
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
-				double imgX = static_cast<double>(handNode.positionImage.x);
-				double imgY = static_cast<double>(handNode.positionImage.y);
-				double depth = static_cast<double>(handNode.positionWorld.y);
+				float imgX = static_cast<float>(handNode.positionImage.x);
+				float imgY = static_cast<float>(handNode.positionImage.y);
+				float depth = static_cast<float>(handNode.positionWorld.y);
+
+				//filter data
+				if (EXIT_FAILURE == mainWnd->gestureAlgos->filterKalman(imgX, imgY)) {
+					qDebug() << "error in Kalman filter";
+				}
+				mainWnd->gestureAlgos->filterBiquad(depth);
+
+				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << imgX << "," << imgY << "," << depth << ")";
 
 				//move cursor to the new position
-				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << imgX << "," << imgY << "," << depth << ")";
 				int x = static_cast<int>(imgX);
 				int y = static_cast<int>(imgY);
 				//emit moveCursor(x, y);//TODO: no window movement
@@ -141,11 +148,13 @@ void GestureThread::setupPipeline()
 	pipeline->EnableGesture();
 	if (pipeline->Init())
 	{
-		if (!pipeline->QueryImageSize(PXCImage::IMAGE_TYPE_DEPTH, mainWnd->imgWidth, mainWnd->imgHeight))
+		pxcU32 imgWidth;
+		pxcU32 imgHeight;
+		if (!pipeline->QueryImageSize(PXCImage::IMAGE_TYPE_DEPTH, imgWidth, imgHeight))
 		{
-			mainWnd->imgWidth = -1;
-			mainWnd->imgHeight = -1;
+			imgWidth = imgHeight = -1;
 		}
+		mainWnd->gestureAlgos->setImageSize(imgWidth, imgHeight);
 	} else
 	{
 		QMessageBox::warning(NULL, "Presenter Helper", "Cannot init gesture camera");

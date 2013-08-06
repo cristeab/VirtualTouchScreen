@@ -29,7 +29,8 @@ public:
 	//filters
 	int filterKalman(float &x, float &y);
 	void filterBiquad(float &depth);
-	void filterDiff(float &depth);
+	template<typename T>
+	void filterDiff(T &depth, T &diffState);
 	//gestures
 	bool isTap(int x, int y, float depth);
 	bool isPressAndHold(int x, int y, float depth);
@@ -50,8 +51,6 @@ private:
 	double sos_mat_[SosMat::NB_BIQUADS][6];
 	double gain_;
 	BiquadState biquadState[SosMat::NB_BIQUADS];
-	float diffState_;
-	enum {MAX_OBS_DURATION = 15, MAX_NB_SAMPLES = 2};
 	int scrWidth_;
 	int scrHeight_;
 	int imgWidth_;

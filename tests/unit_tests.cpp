@@ -10,6 +10,10 @@ private slots:
     void imageToScreenFilterKalman();
 	void filterBiquad();
 	void filterDiff();
+	void isTap();
+private:
+	int getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
+		const QString &fileName);
 };
 
 void TestGestureAlgos::imageToScreenFilterKalman()
@@ -70,13 +74,60 @@ void TestGestureAlgos::filterDiff()
 	QVERIFY(NULL != algos);
 
 	float s = static_cast<float>(0);
-	algos->filterDiff(s);
+	float diffState = static_cast<float>(0);
+	algos->filterDiff(s, diffState);
 	QVERIFY(0 == s);
 	s = static_cast<float>(1.0);
-	algos->filterDiff(s);
+	algos->filterDiff(s, diffState);
 	QVERIFY(1.0 == s);
-	algos->filterDiff(s);
+	algos->filterDiff(s, diffState);
 	QVERIFY(0 == s);
+}
+
+int TestGestureAlgos::getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
+		const QString &fileName)
+{
+	QFile file(fileName);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		return EXIT_FAILURE;
+	}
+	QTextStream istream(&file);
+	
+	while (!istream.atEnd()) {
+		QString line = istream.readLine();
+		int idx = line.indexOf(") = (");
+		if (0 <= idx) {
+			QRegExp rx("(\\d+) , (\\d+) , (\\d*\\.\\d+)");
+			int pos = rx.indexIn(line, idx);
+			if (-1 < pos) {
+				x.push_back(rx.cap(1).toInt());
+				y.push_back(rx.cap(2).toInt());
+				depth.push_back(rx.cap(3).toFloat());
+			}
+		}
+	}
+	
+	file.close();
+	return EXIT_SUCCESS;
+}
+
+void TestGestureAlgos::isTap()
+{
+	QVector<int> x;
+	QVector<int> y;
+	QVector<float> depth;
+	QVERIFY(EXIT_SUCCESS == getData(x, y, depth, "../../tests/ULTRABOOK-BC_vts8_tap.LOG"));
+
+	GestureAlgos *algos = GestureAlgos::instance();
+	QVERIFY(NULL != algos);
+
+	//start to process from index 800 in order to detect 3 taps
+	int count = 0;
+	for (int i = 800; i < x.size(); ++i) {
+		bool tap = algos->isTap(x[i], y[i], depth[i]);
+		if (tap) ++count;
+	}
+	QVERIFY(3 == count);
 }
 
 QTEST_MAIN(TestGestureAlgos)

@@ -19,7 +19,6 @@ public:
 	~VirtualTouchScreen();
 	enum {OFFSET_X = 200, OFFSET_Y = 100, 
 		SCALE_FACTOR_x100 = 100,
-		NB_SWIPES_PER_PAGE_SWITCH = 1,
 		POINTER_SIZE = 15};
 
 public slots:
@@ -37,13 +36,11 @@ private:
 	void saveSettings();
 	GestureThread *gestureThread;
 	GestureAlgos *gestureAlgos;
-	pxcU32 imgWidth;
-	pxcU32 imgHeight;
 	QString pointerIconPath;
 	int pointerSize;
 	int offsetX;
 	int offsetY;
-	double scaleFactor;
+	float scaleFactor;
 	ConfigDialog *config;
 };
 

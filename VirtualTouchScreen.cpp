@@ -15,7 +15,6 @@
 VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	: QMainWindow(parent),
 	gestureThread(NULL),
-	imgWidth(0), imgHeight(0),
 	pointerSize(POINTER_SIZE),
 	offsetX(OFFSET_X), offsetY(OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
@@ -33,6 +32,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	//init gesture algosithms
 	gestureAlgos = GestureAlgos::instance();
 	gestureAlgos->setScreenSize(geom.width(), geom.height());
+	gestureAlgos->setCorrectionFactors(scaleFactor, offsetX, offsetY);
 
 	//config = new ConfigDialog(NULL, this);//screen size must be set
 

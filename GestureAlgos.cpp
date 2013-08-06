@@ -2,7 +2,7 @@
 #include <QDebug>
 #include "GestureAlgos.h"
 
-GestureAlgos::GestureAlgos() : diffState_(0.0),
+GestureAlgos::GestureAlgos() :
 	scrWidth_(0), scrHeight_(0),
 	imgWidth_(0), imgHeight_(0),
 	scaleFactor_(0.0), offsetX_(0), offsetY_(0),
@@ -132,58 +132,68 @@ void GestureAlgos::filterBiquad(float &depth)
 	depth = static_cast<float>(gain_*depth);
 }
 
-void GestureAlgos::filterDiff(float &depth)
+template<typename T>
+void GestureAlgos::filterDiff(T &depth, T &prevDepth)
 {
-	float tmp = depth;
-	depth -= diffState_;
-	diffState_ = tmp;
+	T tmp = depth;
+	depth -= prevDepth;
+	prevDepth = tmp;
 }
 
 bool GestureAlgos::isTap(int x, int y, float depth)
 {
+	//constants
+	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
+	const static int DIFF_POS_THRESHOLD = 20;
+	const static int MAX_OBS_DURATION = 20;
+	//permanent variables
 	static int obsDuration = 0;
 	static int varSign = 0;
-	static int nbSignSamp = 0;
+	static float prevDepth = static_cast<float>(0);
+	static int prevX = 0;
+	static int prevY = 0;
 
 	bool out = false;
-	float diffSamp = depth;
-	filterDiff(diffSamp);
 
-	if (qAbs(diffSamp) > 0.05)
+	filterDiff(depth, prevDepth);
+	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
 	{
-		int sign = static_cast<int>((diffSamp)/qAbs(diffSamp));
+		int sign = static_cast<int>((depth)/qAbs(depth));
 		if (0 == varSign)
 		{
+			//variation detected
 			varSign = sign;
 			obsDuration = 0;
-			nbSignSamp = 0;
 		}
-		else if (varSign == sign)
+		else if (varSign != sign)
 		{
-			obsDuration = 0;
-			++nbSignSamp;
-		}
-		else
-		{
-			if (MAX_NB_SAMPLES < nbSignSamp)
-			{
+			//sign change detected
+			if (-1 == varSign) {
 				out = true;
-				obsDuration = 0;
 				varSign = 0;
+			} else {
+				varSign = -varSign;
+				obsDuration = 0;
 			}
-			nbSignSamp = 0;
 		}
 	}
 
-	if (0 != varSign)
+	//check the position of the hand (helps reducing the false alarms)
+	filterDiff(x, prevX);
+	filterDiff(y, prevY);
+	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
+		varSign = 0;//not a tap
+	}
+
+	//increment the observation duration once the hand is closer to the camera
+	if (-1 == varSign)
 	{
 		++obsDuration;
 	}
+	//tap duration cannot exceed the maximum observation duration
 	if (MAX_OBS_DURATION < obsDuration)
 	{
-		obsDuration = 0;
 		varSign = 0;
-		nbSignSamp = 0;
 	}
 
 	return out;
