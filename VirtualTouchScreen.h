@@ -24,7 +24,7 @@ public:
 public slots:
 	void showMenu();
 	void showHelp();
-	void onMoveCursor(int x, int y);
+	void onMoveHand(int x, int y);
 	void onTap(int x, int y);
 	void onShowCoords(int x, int y);
 	void onSwipe(BYTE code);

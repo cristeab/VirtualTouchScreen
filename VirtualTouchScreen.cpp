@@ -119,7 +119,7 @@ void VirtualTouchScreen::showHelp()
 		"the application icon on the main toolbar or click the pointer.");
 }
 
-void VirtualTouchScreen::onMoveCursor(int x, int y)
+void VirtualTouchScreen::onMoveHand(int x, int y)
 {
 	//filter position
 	float fx = x;

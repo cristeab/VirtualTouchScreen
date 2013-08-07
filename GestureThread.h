@@ -15,7 +15,7 @@ public:
 protected:
 	void run();
 signals:
-	void moveCursor(int x, int y);
+	void moveHand(int x, int y);
 	void tap(int x, int y);
 	void showCoords(int x, int y);
 private:

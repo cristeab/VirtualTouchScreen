@@ -73,7 +73,7 @@ private:
 GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(), mainWnd(obj)
 {
 	setupPipeline();
-	connect(this, SIGNAL(moveCursor(int,int)), mainWnd, SLOT(onMoveCursor(int,int)));
+	connect(this, SIGNAL(moveHand(int,int)), mainWnd, SLOT(onMoveHand(int,int)));
 	connect(this, SIGNAL(tap(int,int)), mainWnd, SLOT(onTap(int,int)));
 	connect(this, SIGNAL(showCoords(int,int)), mainWnd, SLOT(onShowCoords(int,int)));
 }
@@ -111,7 +111,7 @@ void GestureThread::run()
 				//move cursor to the new position
 				int x = static_cast<int>(imgX);
 				int y = static_cast<int>(imgY);
-				//emit moveCursor(x, y);//TODO: no window movement
+				emit moveHand(x, y);//TODO: no window movement
 				//check for tap
 				if(mainWnd->gestureAlgos->isTap(x, y, depth))
 				{
