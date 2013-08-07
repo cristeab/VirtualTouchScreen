@@ -42,6 +42,8 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
 	gestureThread = new GestureThread(this);
 	gestureThread->start();
+
+	resize(gestureAlgos->imageSize());//TODO: should use a different approach
 }
 
 VirtualTouchScreen::~VirtualTouchScreen()

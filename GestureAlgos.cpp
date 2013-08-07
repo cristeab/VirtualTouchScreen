@@ -80,6 +80,9 @@ int GestureAlgos::toHandCenter(QPoint &pt, const QPoint &handPos)
 	pt.setX(image_.width()/2+pt.x()-handPos.x());
 	pt.setY(image_.height()/2+pt.y()-handPos.y());
 
+	//invert X axis
+	pt.setX(image_.width()-pt.x());
+
 	return EXIT_SUCCESS;
 }
 

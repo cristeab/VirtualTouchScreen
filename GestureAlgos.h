@@ -19,8 +19,11 @@ public:
 	void setImageSize(const QSize &image) {
 		image_ = image;
 	}
-	QPoint imageCenter() {
+	QPoint imageCenter() const {
 		return QPoint(image_.width()/2, image_.height()/2);
+	}
+	QSize imageSize() const {
+		return image_;
 	}
 	void setCorrectionFactors(float scaleFactor, const QPoint &offset) {
 		scaleFactor_ = scaleFactor;
