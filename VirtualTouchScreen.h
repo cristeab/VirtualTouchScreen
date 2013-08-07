@@ -3,6 +3,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include <Windows.h>
+#include <QPoint>
 #include "util_pipeline.h"
 
 class GestureThread;
@@ -38,8 +39,7 @@ private:
 	GestureAlgos *gestureAlgos;
 	QString pointerIconPath;
 	int pointerSize;
-	int offsetX;
-	int offsetY;
+	QPoint offset;
 	float scaleFactor;
 	ConfigDialog *config;
 };

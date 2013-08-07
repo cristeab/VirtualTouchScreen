@@ -197,7 +197,7 @@ void GestureThread::setupPipeline()
 		{
 			imgWidth = imgHeight = -1;
 		}
-		mainWnd->gestureAlgos->setImageSize(imgWidth, imgHeight);
+		mainWnd->gestureAlgos->setImageSize(QSize(imgWidth, imgHeight));
 	} else
 	{
 		QMessageBox::warning(NULL, "Presenter Helper", "Cannot init gesture camera");

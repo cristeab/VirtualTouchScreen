@@ -3,9 +3,9 @@
 #include "GestureAlgos.h"
 
 GestureAlgos::GestureAlgos() :
-	scrWidth_(0), scrHeight_(0),
-	imgWidth_(0), imgHeight_(0),
-	scaleFactor_(0.0), offsetX_(0), offsetY_(0),
+	screen_(0, 0),
+	image_(0,0),
+	scaleFactor_(0.0), offset_(0,0),
 	KF_(cv::KalmanFilter(4, 2, 0)),
 	measurement_(cv::Mat_<float>(2,1))
 {
@@ -13,13 +13,13 @@ GestureAlgos::GestureAlgos() :
 
 int GestureAlgos::initKalman()
 {
-	if ((0 >= scrWidth_) || (0 >= scrHeight_)) {
+	if ((0 >= screen_.width()) || (0 >= screen_.height())) {
 		return EXIT_FAILURE;
 	}
 	//setup Kalman filter
 	measurement_.setTo(cv::Scalar(0));
-	KF_.statePre.at<float>(0) = static_cast<float>(scrWidth_)/2.0;
-	KF_.statePre.at<float>(1) = static_cast<float>(scrHeight_)/2.0;
+	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;
+	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;
 	KF_.statePre.at<float>(2) = 0;
 	KF_.statePre.at<float>(3) = 0;
 	KF_.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
@@ -39,29 +39,29 @@ int GestureAlgos::imageToScreen(QPoint &pt)
 	double y = pt.y();
 
 	//convert from image coodinates to screen coordinates
-	if ((0 < imgWidth_) && (0 < imgHeight_))
+	if ((0 < image_.width()) && (0 < image_.height()))
 	{
-		x = (x*scrWidth_)/imgWidth_;
-		y = (y*scrHeight_)/imgHeight_;
+		x = (x*screen_.width())/image_.width();
+		y = (y*screen_.height())/image_.height();
 	} else {
 		qDebug() << "either image width or image height is not initialized";
 		rc = EXIT_FAILURE;
 	}
 	//invert X axis
-	x = scrWidth_-x;
+	x = screen_.width()-x;
 	//apply corrections as needed
-	if ((0 < scaleFactor_) && (0 <= offsetX_) && (0 <= offsetY_)) {
-		x = scaleFactor_*(x-offsetX_);
-		y = scaleFactor_*(y-offsetY_);
+	if ((0 < scaleFactor_) && (0 <= offset_.x()) && (0 <= offset_.y())) {
+		x = scaleFactor_*(x-offset_.x());
+		y = scaleFactor_*(y-offset_.y());
 	} else {
 		qDebug() << "correction factors have not been initialized";
 		rc = EXIT_FAILURE;
 	}
 	//threshold coordinates
 	if (0 > x) x = 0.0;
-	else if (scrWidth_ < x) x = scrWidth_-10;
+	else if (screen_.width() < x) x = screen_.width()-10;
 	if (0 > y) y = 0;
-	else if (scrHeight_ < y) y = scrHeight_-10;
+	else if (screen_.height() < y) y = screen_.height()-10;
 
 	//convert back to integers
 	pt.setX(static_cast<int>(x));

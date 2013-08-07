@@ -16,7 +16,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	: QMainWindow(parent),
 	gestureThread(NULL),
 	pointerSize(POINTER_SIZE),
-	offsetX(OFFSET_X), offsetY(OFFSET_Y),
+	offset(OFFSET_X,OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
 	config(NULL)
 {
@@ -31,8 +31,8 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 
 	//init gesture algosithms
 	gestureAlgos = GestureAlgos::instance();
-	gestureAlgos->setScreenSize(geom.width(), geom.height());
-	gestureAlgos->setCorrectionFactors(scaleFactor, offsetX, offsetY);
+	gestureAlgos->setScreenSize(QSize(geom.width(), geom.height()));
+	gestureAlgos->setCorrectionFactors(scaleFactor, offset);
 
 	//config = new ConfigDialog(NULL, this);//screen size must be set
 
@@ -177,8 +177,8 @@ void VirtualTouchScreen::loadSettings()
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	pointerIconPath = settings.value(POINTER_ICON_PATH, ":/icons/green-pointer.png").toString();
 	pointerSize = settings.value(KEY_POINTER_SIZE, POINTER_SIZE).toInt();
-	offsetX = settings.value(KEY_OFFSET_X, OFFSET_X).toInt();
-	offsetY = settings.value(KEY_OFFSET_Y, OFFSET_Y).toInt();
+	offset.setX(settings.value(KEY_OFFSET_X, OFFSET_X).toInt());
+	offset.setY(settings.value(KEY_OFFSET_Y, OFFSET_Y).toInt());
 	scaleFactor = settings.value(SCALE_FACTOR, SCALE_FACTOR_x100/100.0).toDouble();
 }
 
@@ -187,7 +187,7 @@ void VirtualTouchScreen::saveSettings()
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	settings.setValue(POINTER_ICON_PATH, pointerIconPath);
 	settings.setValue(KEY_POINTER_SIZE, pointerSize);
-	settings.setValue(KEY_OFFSET_X, offsetX);
-	settings.setValue(KEY_OFFSET_Y, offsetY);
+	settings.setValue(KEY_OFFSET_X, offset.x());
+	settings.setValue(KEY_OFFSET_Y, offset.y());
 	settings.setValue(SCALE_FACTOR, scaleFactor);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QPoint>
+#include <QSize>
 #include "opencv2/video/tracking.hpp"
 
 class GestureAlgos
@@ -12,18 +13,15 @@ public:
 		return &instance;
 	}
 	//algorithms parameters
-	void setScreenSize(int scrWidth, int scrHeight) {
-		scrWidth_ = scrWidth;
-		scrHeight_ = scrHeight;
+	void setScreenSize(const QSize &screen) {
+		screen_ = screen;
 	}
-	void setImageSize(int imgWidth, int imgHeight) {
-		imgWidth_ = imgWidth;
-		imgHeight_ = imgHeight;
+	void setImageSize(const QSize &image) {
+		image_ = image;
 	}
-	void setCorrectionFactors(float scaleFactor, int offsetX, int offsetY) {
+	void setCorrectionFactors(float scaleFactor, const QPoint &offset) {
 		scaleFactor_ = scaleFactor;
-		offsetX_ = offsetX;
-		offsetY_ = offsetY;
+		offset_ = offset;
 	}
 	//transforms to screen coordinates
 	int imageToScreen(QPoint &pt);
@@ -52,13 +50,10 @@ private:
 	double sos_mat_[SosMat::NB_BIQUADS][6];
 	double gain_;
 	BiquadState biquadState[SosMat::NB_BIQUADS];
-	int scrWidth_;
-	int scrHeight_;
-	int imgWidth_;
-	int imgHeight_;
+	QSize screen_;
+	QSize image_;
 	float scaleFactor_;
-	int offsetX_;
-	int offsetY_;
+	QPoint offset_;
 	cv::KalmanFilter KF_;
 	cv::Mat_<float> measurement_;
 	GestureAlgos(const GestureAlgos&);

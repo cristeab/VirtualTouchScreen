@@ -25,13 +25,13 @@ void TestGestureAlgos::imageToScreenFilterKalman()
 	QPoint pt(0, 0);
 	QVERIFY(EXIT_FAILURE == algos->filterKalman(pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
-	algos->setScreenSize(1024, 768);
+	algos->setScreenSize(QSize(1024, 768));
 	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
-	algos->setImageSize(320, 240);
+	algos->setImageSize(QSize(320, 240));
 	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
-	algos->setCorrectionFactors(1.0, 0, 0);
+	algos->setCorrectionFactors(1.0, QPoint(0, 0));
 	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
 	pt.setX(0);
 	pt.setY(0);
