@@ -176,8 +176,9 @@ void VirtualTouchScreen::saveSettings()
 void VirtualTouchScreen::paintEvent(QPaintEvent*)
 {
 	QPixmap pix(gestureAlgos->imageSize());
-	QPainter p(&pix);
+	pix.fill(Qt::transparent);
 
+	QPainter p(&pix);
 	QPen pen;
 	pen.setColor(QColor(255,0,0,255));
 	pen.setWidth(3);
