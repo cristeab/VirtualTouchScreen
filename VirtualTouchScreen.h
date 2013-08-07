@@ -25,7 +25,7 @@ public:
 public slots:
 	void showMenu();
 	void showHelp();
-	void onMoveHand(const QPoint &pt);
+	void onMoveHand(const QPoint pt);
 	void onTap(const QPoint &pt);
 	void onShowCoords(const QPoint &pt);
 	void onSwipe(BYTE code);

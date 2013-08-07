@@ -74,7 +74,7 @@ GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(),
 	mainWnd(obj)
 {
 	setupPipeline();
-	connect(this, SIGNAL(moveHand(const QPoint&)), mainWnd, SLOT(onMoveHand(const QPoint&)));
+	connect(this, SIGNAL(moveHand(const QPoint)), mainWnd, SLOT(onMoveHand(const QPoint)));
 	connect(this, SIGNAL(tap(const QPoint&)), mainWnd, SLOT(onTap(const QPoint&)));
 	connect(this, SIGNAL(showCoords(const QPoint&)), mainWnd, SLOT(onShowCoords(const QPoint&)));
 }

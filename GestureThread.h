@@ -16,7 +16,7 @@ public:
 protected:
 	void run();
 signals:
-	void moveHand(const QPoint &pt);
+	void moveHand(const QPoint pt);
 	void tap(const QPoint &pt);
 	void showCoords(const QPoint &pt);
 private:

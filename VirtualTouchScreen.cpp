@@ -120,7 +120,7 @@ void VirtualTouchScreen::showHelp()
 		"the application icon on the main toolbar or click the pointer.");
 }
 
-void VirtualTouchScreen::onMoveHand(const QPoint &pt)
+void VirtualTouchScreen::onMoveHand(const QPoint pt)
 {
 	move(pt.x(), pt.y());
 }

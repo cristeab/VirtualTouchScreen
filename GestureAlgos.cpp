@@ -97,8 +97,10 @@ int GestureAlgos::filterKalman(QPoint &pt)
 	measurement_(0) = static_cast<float>(pt.x());
 	measurement_(1) = static_cast<float>(pt.y());
 	cv::Mat estimated = KF_.correct(measurement_);
-	pt.setX(estimated.at<int>(0));
-	pt.setY(estimated.at<int>(1));
+	float tmp = estimated.at<float>(0);
+	pt.setX(static_cast<int>(tmp));
+	tmp = estimated.at<float>(1);
+	pt.setY(static_cast<int>(tmp));
 
 	return EXIT_SUCCESS;
 }
