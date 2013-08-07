@@ -19,12 +19,18 @@ public:
 	void setImageSize(const QSize &image) {
 		image_ = image;
 	}
+	QPoint imageCenter() {
+		return QPoint(image_.width()/2, image_.height()/2);
+	}
 	void setCorrectionFactors(float scaleFactor, const QPoint &offset) {
 		scaleFactor_ = scaleFactor;
 		offset_ = offset;
 	}
 	//transforms to screen coordinates
 	int imageToScreen(QPoint &pt);
+	//transforms absolute finger coordinates to coordinates relative to the center of the hand which is 
+	//at the fixed position (imgW/2, imgH/2)
+	int toHandCenter(QPoint &pt, const QPoint &handPos);
 	//filters
 	int filterKalman(QPoint &pt);
 	void filterLowPass(float &depth);

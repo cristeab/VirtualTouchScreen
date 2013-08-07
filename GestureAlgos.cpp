@@ -70,6 +70,19 @@ int GestureAlgos::imageToScreen(QPoint &pt)
 	return rc;
 }
 
+int GestureAlgos::toHandCenter(QPoint &pt, const QPoint &handPos)
+{
+	if ((0 >= image_.width()) || (0 >= image_.height())) {
+		qDebug() << "either image width or image height is not initialized";
+		return EXIT_FAILURE;
+	}
+
+	pt.setX(image_.width()/2+pt.x()-handPos.x());
+	pt.setY(image_.height()/2+pt.y()-handPos.y());
+
+	return EXIT_SUCCESS;
+}
+
 int GestureAlgos::filterKalman(QPoint &pt)
 {
 	static bool initDone = false;

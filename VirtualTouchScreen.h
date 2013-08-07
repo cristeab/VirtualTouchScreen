@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include <Windows.h>
 #include <QPoint>
+#include <QVector>
 #include "util_pipeline.h"
 
 class GestureThread;
@@ -19,9 +20,8 @@ public:
 	explicit VirtualTouchScreen(QWidget *parent = 0);
 	~VirtualTouchScreen();
 	enum {OFFSET_X = 200, OFFSET_Y = 100, 
-		SCALE_FACTOR_x100 = 100,
-		POINTER_SIZE = 15};
-
+		SCALE_FACTOR_x100 = 100};
+	enum Hand {THUMB = 0, INDEX, MIDDLE, RING, PINKY, CENTER, ELBOW, POINTS};
 public slots:
 	void showMenu();
 	void showHelp();
@@ -30,18 +30,22 @@ public slots:
 	void onShowCoords(const QPoint &pt);
 	void onSwipe(BYTE code);
 
+protected:
+	void paintEvent(QPaintEvent*);
+
 private:
 	void setupActions();
 	void loadPointer(const QString &path, int size);
 	void loadSettings();
 	void saveSettings();
+	void drawLine(QPainter& p, int p1, int p2);
 	GestureThread *gestureThread;
 	GestureAlgos *gestureAlgos;
 	QString pointerIconPath;
-	int pointerSize;
 	QPoint offset;
 	float scaleFactor;
 	ConfigDialog *config;
+	QVector<QPoint> handSkeletonPoints_;
 };
 
 #endif // VirtualTouchScreen_H

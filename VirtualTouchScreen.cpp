@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QAction>
 #include <QSettings>
+#include <QPainter>
 #include "GestureThread.h"
 #include "GestureAlgos.h"
 #include "VirtualTouchScreen.h"
@@ -15,10 +16,10 @@
 VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	: QMainWindow(parent),
 	gestureThread(NULL),
-	pointerSize(POINTER_SIZE),
 	offset(OFFSET_X,OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
-	config(NULL)
+	config(NULL),
+	handSkeletonPoints_(Hand::POINTS)
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 
@@ -176,7 +177,6 @@ void VirtualTouchScreen::loadSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	pointerIconPath = settings.value(POINTER_ICON_PATH, ":/icons/green-pointer.png").toString();
-	pointerSize = settings.value(KEY_POINTER_SIZE, POINTER_SIZE).toInt();
 	offset.setX(settings.value(KEY_OFFSET_X, OFFSET_X).toInt());
 	offset.setY(settings.value(KEY_OFFSET_Y, OFFSET_Y).toInt());
 	scaleFactor = settings.value(SCALE_FACTOR, SCALE_FACTOR_x100/100.0).toDouble();
@@ -186,8 +186,33 @@ void VirtualTouchScreen::saveSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	settings.setValue(POINTER_ICON_PATH, pointerIconPath);
-	settings.setValue(KEY_POINTER_SIZE, pointerSize);
 	settings.setValue(KEY_OFFSET_X, offset.x());
 	settings.setValue(KEY_OFFSET_Y, offset.y());
 	settings.setValue(SCALE_FACTOR, scaleFactor);
+}
+
+void VirtualTouchScreen::paintEvent(QPaintEvent*)
+{
+	QPainter p(this);
+	QPen pen;
+
+	pen.setColor(QColor(255,0,0,255));
+	pen.setWidth(3);
+	p.setPen(pen);
+
+	// Draw Hand Skeleton
+	//TODO: data synchronization needed
+	//TODO: the center of the hand should be always displayed
+	drawLine(p, Hand::ELBOW,  Hand::CENTER);
+	drawLine(p, Hand::CENTER, Hand::THUMB);
+	drawLine(p, Hand::CENTER, Hand::INDEX);
+	drawLine(p, Hand::CENTER, Hand::MIDDLE);
+	drawLine(p, Hand::CENTER, Hand::RING);
+	drawLine(p, Hand::CENTER, Hand::PINKY);
+}
+
+void VirtualTouchScreen::drawLine(QPainter& p, int p1, int p2)
+{
+	p.drawLine(handSkeletonPoints_[p1].x(), handSkeletonPoints_[p1].y(),
+		handSkeletonPoints_[p2].x(), handSkeletonPoints_[p2].y());
 }

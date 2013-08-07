@@ -70,7 +70,8 @@ private:
 	VirtualTouchScreen *pres;
 };
 
-GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(), mainWnd(obj)
+GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(), 
+	mainWnd(obj)
 {
 	setupPipeline();
 	connect(this, SIGNAL(moveHand(const QPoint&)), mainWnd, SLOT(onMoveHand(const QPoint&)));
@@ -90,13 +91,16 @@ void GestureThread::run()
 		if(pipeline->AcquireFrame(true))
 		{
 			gesture = pipeline->QueryGesture();
+			bool updateHand = true;
 
 			//hand position
 			PXCGesture::GeoNode handNode;
+			QPoint handPos;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
-				QPoint handPos(handNode.positionImage.x, handNode.positionImage.y);
+				handPos.setX(handNode.positionImage.x);
+				handPos.setY(handNode.positionImage.y);
 				float depth = static_cast<float>(handNode.positionWorld.y);
 
 				//convert to screen coordinates
@@ -136,6 +140,8 @@ void GestureThread::run()
 				default:
 					(void)0;
 				}
+			} else {
+				updateHand = false;
 			}
 
 			//finger position
@@ -166,9 +172,11 @@ void GestureThread::run()
 								", y = " << fingerNode[i].positionImage.y;
 							break;
 						default:
-							(void)0;
+							updateHand = false;
 						}
 					}
+			} else {
+				updateHand = false;
 			}
 
 			//elbow position
@@ -177,6 +185,24 @@ void GestureThread::run()
 				&elbowNode) != PXC_STATUS_ITEM_UNAVAILABLE) {
 					qDebug() << "elbow: x = " << elbowNode.positionImage.x << 
 						", y = " << elbowNode.positionImage.y;
+			} else {
+				updateHand = false;
+			}
+
+			if (updateHand) {
+				//fingers
+				int i = 0;
+				for (; i < mainWnd->handSkeletonPoints_.size(); ++i) {
+					mainWnd->handSkeletonPoints_[i] = QPoint(fingerNode[i].positionImage.x, fingerNode[i].positionImage.y);
+					mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], handPos);
+				}
+				//hand center
+				mainWnd->handSkeletonPoints_[i++] = mainWnd->gestureAlgos->imageCenter();
+				//elbow
+				mainWnd->handSkeletonPoints_[i] = QPoint(elbowNode.positionImage.x, elbowNode.positionImage.y);
+				mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], handPos);
+				//request hand skeleton redraw
+				mainWnd->update();
 			}
 
 			// we must release the frame
