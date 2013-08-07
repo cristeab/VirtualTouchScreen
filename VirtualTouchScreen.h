@@ -35,7 +35,6 @@ protected:
 
 private:
 	void setupActions();
-	void loadPointer(const QString &path, int size);
 	void loadSettings();
 	void saveSettings();
 	void drawLine(QPainter& p, int p1, int p2);

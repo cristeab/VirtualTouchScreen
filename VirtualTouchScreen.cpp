@@ -145,26 +145,6 @@ void VirtualTouchScreen::onShowCoords(const QPoint &pt)
 	//config->showCoords(x, y);
 }
 
-void VirtualTouchScreen::loadPointer(const QString &path, int size)
-{
-	QPixmap pix(path);
-	if ((size != pix.size().width()) && (0 < size))
-	{
-		pix = pix.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	}
-	if (!pix.isNull()) {
-		QPalette p = palette();
-		p.setBrush(QPalette::Background, pix);
-		setPalette(p);
-		QSize size = pix.size();
-		resize(pix.size());
-		setMask(pix.mask());
-	}
-	else {
-		QMessageBox::warning(this, APPLICATION_NAME, "Cannot load cursor pixmap");
-	}
-}
-
 #define COMPANY_NAME "Bogdan Cristea"
 #define POINTER_ICON_PATH "PointerIconPath"
 #define KEY_POINTER_SIZE "PointerSize"
@@ -195,9 +175,10 @@ void VirtualTouchScreen::saveSettings()
 
 void VirtualTouchScreen::paintEvent(QPaintEvent*)
 {
-	QPainter p(this);
-	QPen pen;
+	QPixmap pix(gestureAlgos->imageSize());
+	QPainter p(&pix);
 
+	QPen pen;
 	pen.setColor(QColor(255,0,0,255));
 	pen.setWidth(3);
 	p.setPen(pen);
@@ -211,6 +192,14 @@ void VirtualTouchScreen::paintEvent(QPaintEvent*)
 	drawLine(p, Hand::CENTER, Hand::MIDDLE);
 	drawLine(p, Hand::CENTER, Hand::RING);
 	drawLine(p, Hand::CENTER, Hand::PINKY);
+
+	//set image on the window
+	if (!pix.isNull()) {
+		QPalette p = palette();
+		p.setBrush(QPalette::Background, pix);
+		setPalette(p);
+		setMask(pix.mask());
+	}
 }
 
 void VirtualTouchScreen::drawLine(QPainter& p, int p1, int p2)
