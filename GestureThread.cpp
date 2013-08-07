@@ -91,6 +91,7 @@ void GestureThread::run()
 		{
 			gesture = pipeline->QueryGesture();
 
+			//hand position
 			PXCGesture::GeoNode handNode;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
@@ -134,6 +135,47 @@ void GestureThread::run()
 				default:
 					(void)0;
 				}
+			}
+
+			//finger position
+			PXCGesture::GeoNode fingerNode[5];
+			if ( gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY |
+				PXCGesture::GeoNode::LABEL_FINGER_THUMB, 
+				5, fingerNode) != PXC_STATUS_ITEM_UNAVAILABLE) {
+					for (int i = 0; i < 5; ++i) {
+						switch (fingerNode[i].body & PXCGesture::GeoNode::LABEL_MASK_DETAILS) {
+						case PXCGesture::GeoNode::LABEL_FINGER_THUMB:
+							qDebug() << "thumb: x = " << fingerNode[i].positionImage.x << 
+								", y = " << fingerNode[i].positionImage.y;
+							break;
+						case PXCGesture::GeoNode::LABEL_FINGER_INDEX:
+							qDebug() << "index: x = " << fingerNode[i].positionImage.x << 
+								", y = " << fingerNode[i].positionImage.y;
+							break;
+						case PXCGesture::GeoNode::LABEL_FINGER_MIDDLE:
+							qDebug() << "middle: x = " << fingerNode[i].positionImage.x << 
+								", y = " << fingerNode[i].positionImage.y;
+							break;
+						case PXCGesture::GeoNode::LABEL_FINGER_RING:
+							qDebug() << "ring: x = " << fingerNode[i].positionImage.x << 
+								", y = " << fingerNode[i].positionImage.y;
+							break;
+						case PXCGesture::GeoNode::LABEL_FINGER_PINKY:
+							qDebug() << "pinky: x = " << fingerNode[i].positionImage.x << 
+								", y = " << fingerNode[i].positionImage.y;
+							break;
+						default:
+							(void)0;
+						}
+					}
+			}
+
+			//elbow position
+			PXCGesture::GeoNode elbowNode;
+			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_ELBOW_PRIMARY,
+				&elbowNode) != PXC_STATUS_ITEM_UNAVAILABLE) {
+					qDebug() << "elbow: x = " << elbowNode.positionImage.x << 
+						", y = " << elbowNode.positionImage.y;
 			}
 
 			// we must release the frame
