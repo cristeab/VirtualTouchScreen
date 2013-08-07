@@ -30,9 +30,14 @@ int GestureAlgos::initKalman()
 	return EXIT_SUCCESS;
 }
 
-int GestureAlgos::imageToScreen(float &x, float &y)
+int GestureAlgos::imageToScreen(QPoint &pt)
 {
 	int rc = EXIT_SUCCESS;
+
+	//convert to double in order to have the highest precision
+	double x = pt.x();
+	double y = pt.y();
+
 	//convert from image coodinates to screen coordinates
 	if ((0 < imgWidth_) && (0 < imgHeight_))
 	{
@@ -58,10 +63,14 @@ int GestureAlgos::imageToScreen(float &x, float &y)
 	if (0 > y) y = 0;
 	else if (scrHeight_ < y) y = scrHeight_-10;
 
+	//convert back to integers
+	pt.setX(static_cast<int>(x));
+	pt.setY(static_cast<int>(y));
+
 	return rc;
 }
 
-int GestureAlgos::filterKalman(float &x, float &y)
+int GestureAlgos::filterKalman(QPoint &pt)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -72,11 +81,11 @@ int GestureAlgos::filterKalman(float &x, float &y)
 	}
 
 	KF_.predict();
-	measurement_(0) = x;
-	measurement_(1) = y;
+	measurement_(0) = static_cast<float>(pt.x());
+	measurement_(1) = static_cast<float>(pt.y());
 	cv::Mat estimated = KF_.correct(measurement_);
-	x = static_cast<int>(estimated.at<float>(0));
-	y = static_cast<int>(estimated.at<float>(1));
+	pt.setX(estimated.at<int>(0));
+	pt.setY(estimated.at<int>(1));
 
 	return EXIT_SUCCESS;
 }
@@ -140,7 +149,7 @@ void GestureAlgos::filterDiff(T &depth, T &prevDepth)
 	prevDepth = tmp;
 }
 
-bool GestureAlgos::isTap(int x, int y, float depth)
+bool GestureAlgos::isTap(const QPoint &pt, float depth)
 {
 	//constants
 	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
@@ -179,6 +188,8 @@ bool GestureAlgos::isTap(int x, int y, float depth)
 	}
 
 	//check the position of the hand (helps reducing the false alarms)
+	int x = pt.x();
+	int y = pt.y();
 	filterDiff(x, prevX);
 	filterDiff(y, prevY);
 	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
@@ -199,7 +210,7 @@ bool GestureAlgos::isTap(int x, int y, float depth)
 	return out;
 }
 
-bool GestureAlgos::isPressAndHold(int x, int y, float depth)
+bool GestureAlgos::isPressAndHold(const QPoint &pt, float depth)
 {
 	//constants
 	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
@@ -233,6 +244,8 @@ bool GestureAlgos::isPressAndHold(int x, int y, float depth)
 	}
 
 	//check the position of the hand (helps reducing the false alarms)
+	int x = pt.x();
+	int y = pt.y();
 	filterDiff(x, prevX);
 	filterDiff(y, prevY);
 	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
@@ -253,7 +266,7 @@ bool GestureAlgos::isPressAndHold(int x, int y, float depth)
 	return out;
 }
 
-bool GestureAlgos::isSlide(int x, int y, float depth)
+bool GestureAlgos::isSlide(const QPoint &pt, float depth)
 {
 	//constants
 	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.015);
@@ -290,6 +303,8 @@ bool GestureAlgos::isSlide(int x, int y, float depth)
 	}
 
 	//check the position of the hand (helps reducing the false alarms)
+	int x = pt.x();
+	int y = pt.y();
 	filterDiff(x, prevX);
 	filterDiff(y, prevY);
 	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
@@ -310,12 +325,12 @@ bool GestureAlgos::isSlide(int x, int y, float depth)
 	return out;
 }
 
-bool GestureAlgos::isPinch(int x, int y, float depth)
+bool GestureAlgos::isPinch(const QPoint &pt, float depth)
 {
 	return false;
 }
 
-bool GestureAlgos::isStretch(int x, int y, float depth)
+bool GestureAlgos::isStretch(const QPoint &pt, float depth)
 {
 	return false;
 }

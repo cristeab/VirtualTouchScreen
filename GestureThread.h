@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QThread>
+#include <QPoint>
 #include "util_pipeline.h"
 
 class MyPipeline;
@@ -15,9 +16,9 @@ public:
 protected:
 	void run();
 signals:
-	void moveHand(int x, int y);
-	void tap(int x, int y);
-	void showCoords(int x, int y);
+	void moveHand(const QPoint &pt);
+	void tap(const QPoint &pt);
+	void showCoords(const QPoint &pt);
 private:
 	void setupPipeline();
 	MyPipeline *pipeline;

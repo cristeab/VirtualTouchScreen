@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QPoint>
 #include "opencv2/video/tracking.hpp"
 
 class GestureAlgos
@@ -25,18 +26,18 @@ public:
 		offsetY_ = offsetY;
 	}
 	//transforms to screen coordinates
-	int imageToScreen(float &x, float &y);
+	int imageToScreen(QPoint &pt);
 	//filters
-	int filterKalman(float &x, float &y);
+	int filterKalman(QPoint &pt);
 	void filterLowPass(float &depth);
 	template<typename T>
 	void filterDiff(T &depth, T &diffState);
 	//gestures
-	bool isTap(int x, int y, float depth);
-	bool isPressAndHold(int x, int y, float depth);
-	bool isSlide(int x, int y, float depth);
-	bool isPinch(int x, int y, float depth);
-	bool isStretch(int x, int y, float depth);
+	bool isTap(const QPoint &pt, float depth);
+	bool isPressAndHold(const QPoint &pt, float depth);
+	bool isSlide(const QPoint &pt, float depth);
+	bool isPinch(const QPoint &pt, float depth);
+	bool isStretch(const QPoint &pt, float depth);
 	//swipe, swipe from edge and turn are implemented in GestureThread
 private:
 	int initKalman();

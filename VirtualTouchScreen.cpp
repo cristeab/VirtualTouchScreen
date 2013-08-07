@@ -119,27 +119,16 @@ void VirtualTouchScreen::showHelp()
 		"the application icon on the main toolbar or click the pointer.");
 }
 
-void VirtualTouchScreen::onMoveHand(int x, int y)
+void VirtualTouchScreen::onMoveHand(const QPoint &pt)
 {
-	//filter position
-	float fx = x;
-	float fy = y;
-	if (EXIT_SUCCESS == gestureAlgos->filterKalman(fx, fy)) {
-		x = static_cast<int>(fx);
-		y = static_cast<int>(fy);
-	} else {
-		qDebug() << "Error when using the Kalman filter";
-	}
-	move(x, y);
+	move(pt.x(), pt.y());
 }
 
-void VirtualTouchScreen::onTap(int x, int y)
+void VirtualTouchScreen::onTap(const QPoint &pt)
 {
 	qDebug() << "onTap: mouse event";
-	mouse_event(MOUSEEVENTF_LEFTDOWN, static_cast<int>(x), 
-		static_cast<int>(y), 0, 0);
-	mouse_event(MOUSEEVENTF_LEFTUP, static_cast<int>(x), 
-		static_cast<int>(y), 0, 0);
+	mouse_event(MOUSEEVENTF_LEFTDOWN, pt.x(), pt.y(), 0, 0);
+	mouse_event(MOUSEEVENTF_LEFTUP, pt.x(), pt.y(), 0, 0);
 }
 
 void VirtualTouchScreen::onSwipe(BYTE code)
@@ -148,7 +137,7 @@ void VirtualTouchScreen::onSwipe(BYTE code)
 	keybd_event(code & 0xff, 0, KEYEVENTF_KEYUP, 0);
 }
 
-void VirtualTouchScreen::onShowCoords(int x, int y)
+void VirtualTouchScreen::onShowCoords(const QPoint &pt)
 {
 	//config->showCoords(x, y);
 }

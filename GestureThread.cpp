@@ -73,9 +73,9 @@ private:
 GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(), mainWnd(obj)
 {
 	setupPipeline();
-	connect(this, SIGNAL(moveHand(int,int)), mainWnd, SLOT(onMoveHand(int,int)));
-	connect(this, SIGNAL(tap(int,int)), mainWnd, SLOT(onTap(int,int)));
-	connect(this, SIGNAL(showCoords(int,int)), mainWnd, SLOT(onShowCoords(int,int)));
+	connect(this, SIGNAL(moveHand(const QPoint&)), mainWnd, SLOT(onMoveHand(const QPoint&)));
+	connect(this, SIGNAL(tap(const QPoint&)), mainWnd, SLOT(onTap(const QPoint&)));
+	connect(this, SIGNAL(showCoords(const QPoint&)), mainWnd, SLOT(onShowCoords(const QPoint&)));
 }
 
 GestureThread::~GestureThread()
@@ -96,27 +96,28 @@ void GestureThread::run()
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
-				float imgX = static_cast<float>(handNode.positionImage.x);
-				float imgY = static_cast<float>(handNode.positionImage.y);
+				QPoint handPos(handNode.positionImage.x, handNode.positionImage.y);
 				float depth = static_cast<float>(handNode.positionWorld.y);
 
+				//convert to screen coordinates
+				mainWnd->gestureAlgos->imageToScreen(handPos);
+
 				//filter data
-				if (EXIT_FAILURE == mainWnd->gestureAlgos->filterKalman(imgX, imgY)) {
+				if (EXIT_FAILURE == mainWnd->gestureAlgos->filterKalman(handPos)) {
 					qDebug() << "error in Kalman filter";
 				}
 				mainWnd->gestureAlgos->filterLowPass(depth);
 
-				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << imgX << "," << imgY << "," << depth << ")";
+				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << handPos.x()
+					<< "," << handPos.y() << "," << depth << ")";
 
 				//move cursor to the new position
-				int x = static_cast<int>(imgX);
-				int y = static_cast<int>(imgY);
-				emit moveHand(x, y);//TODO: no window movement
+				emit moveHand(handPos);//TODO: no window movement
 				//check for tap
-				if(mainWnd->gestureAlgos->isTap(x, y, depth))
+				if(mainWnd->gestureAlgos->isTap(handPos, depth))
 				{
 					qDebug() << "tap detected";
-					emit tap(x, y);
+					emit tap(handPos);
 				}
 				//display coordinates if requested
 				/*if (mainWnd->showCoords)

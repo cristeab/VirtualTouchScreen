@@ -22,23 +22,22 @@ void TestGestureAlgos::imageToScreenFilterKalman()
 {
 	GestureAlgos *algos = GestureAlgos::instance();
 	QVERIFY(NULL != algos);
-	float x = 0;
-	float y = 0;
-	QVERIFY(EXIT_FAILURE == algos->filterKalman(x, y));
-	QVERIFY(EXIT_FAILURE == algos->imageToScreen(x, y));
+	QPoint pt(0, 0);
+	QVERIFY(EXIT_FAILURE == algos->filterKalman(pt));
+	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setScreenSize(1024, 768);
-	QVERIFY(EXIT_SUCCESS == algos->filterKalman(x, y));
-	QVERIFY(EXIT_FAILURE == algos->imageToScreen(x, y));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
+	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setImageSize(320, 240);
-	QVERIFY(EXIT_SUCCESS == algos->filterKalman(x, y));
-	QVERIFY(EXIT_FAILURE == algos->imageToScreen(x, y));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
+	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setCorrectionFactors(1.0, 0, 0);
-	QVERIFY(EXIT_SUCCESS == algos->filterKalman(x, y));
-	x = 0;
-	y = 0;
-	QVERIFY(EXIT_SUCCESS == algos->imageToScreen(x, y));
-	QVERIFY(1024.0 == x);
-	QVERIFY(0.0 == y);
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
+	pt.setX(0);
+	pt.setY(0);
+	QVERIFY(EXIT_SUCCESS == algos->imageToScreen(pt));
+	QVERIFY(1024.0 == pt.x());
+	QVERIFY(0.0 == pt.y());
 }
 
 void TestGestureAlgos::filterLowPass()
@@ -127,7 +126,7 @@ void TestGestureAlgos::isTap()
 	int count = 0;
 	for (int i = 800; i < x.size(); ++i) {		
 		algos->filterLowPass(depth[i]);//apply low pass filter to depth signal
-		if (algos->isTap(x[i], y[i], depth[i])) {
+		if (algos->isTap(QPoint(x[i], y[i]), depth[i])) {
 			if (850 < i) ++count; //skip transition in the filtered signal
 		}
 	}
@@ -148,7 +147,7 @@ void TestGestureAlgos::isPressAndHold()
 	int count = 0;
 	for (int i = 0; i < x.size(); ++i) {
 		algos->filterLowPass(depth[i]);
-		if (algos->isPressAndHold(x[i], y[i], depth[i])) {
+		if (algos->isPressAndHold(QPoint(x[i], y[i]), depth[i])) {
 			++count;
 		}
 	}
@@ -169,7 +168,7 @@ void TestGestureAlgos::isSlide()
 	int count = 0;
 	for (int i = 0; i < x.size(); ++i) {
 		algos->filterLowPass(depth[i]);
-		if (algos->isSlide(x[i], y[i], depth[i])) {
+		if (algos->isSlide(QPoint(x[i], y[i]), depth[i])) {
 			++count;
 		}
 	}
