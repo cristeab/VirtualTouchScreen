@@ -95,15 +95,16 @@ void GestureThread::run()
 
 			//hand position
 			PXCGesture::GeoNode handNode;
-			QPoint handPos;
+			QPoint refHandPos;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
-				handPos.setX(handNode.positionImage.x);
-				handPos.setY(handNode.positionImage.y);
+				refHandPos.setX(handNode.positionImage.x);
+				refHandPos.setY(handNode.positionImage.y);
 				float depth = static_cast<float>(handNode.positionWorld.y);
 
 				//convert to screen coordinates
+				QPoint handPos = refHandPos;//TODO: remove this
 				mainWnd->gestureAlgos->imageToScreen(handPos);
 
 				//filter data
@@ -192,15 +193,15 @@ void GestureThread::run()
 			if (updateHand) {
 				//fingers
 				int i = 0;
-				for (; i < mainWnd->handSkeletonPoints_.size(); ++i) {
+				for (; i < 5; ++i) {
 					mainWnd->handSkeletonPoints_[i] = QPoint(fingerNode[i].positionImage.x, fingerNode[i].positionImage.y);
-					mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], handPos);
+					mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], refHandPos);
 				}
 				//hand center
 				mainWnd->handSkeletonPoints_[i++] = mainWnd->gestureAlgos->imageCenter();
 				//elbow
 				mainWnd->handSkeletonPoints_[i] = QPoint(elbowNode.positionImage.x, elbowNode.positionImage.y);
-				mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], handPos);
+				mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], refHandPos);
 				//request hand skeleton redraw
 				mainWnd->update();
 			}
