@@ -181,7 +181,7 @@ void VirtualTouchScreen::paintEvent(QPaintEvent*)
 	QPainter p(&pix);
 	QPen pen;
 	pen.setColor(QColor(255,0,0,255));
-	pen.setWidth(3);
+	pen.setWidth(5);
 	p.setPen(pen);
 
 	// Draw Hand Skeleton
