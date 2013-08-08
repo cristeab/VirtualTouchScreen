@@ -199,6 +199,7 @@ void GestureThread::run()
 			if (updateHand) {
 				//fingers
 				int i = 0;
+				mainWnd->skeletonPointMutex_.lock();
 				for (; i < 5; ++i) {
 					mainWnd->handSkeletonPoints_[i] = QPoint(fingerNode[i].positionImage.x, fingerNode[i].positionImage.y);
 					mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], refHandPos);
@@ -208,8 +209,9 @@ void GestureThread::run()
 				//elbow
 				mainWnd->handSkeletonPoints_[i] = QPoint(elbowNode.positionImage.x, elbowNode.positionImage.y);
 				mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], refHandPos);
+				mainWnd->skeletonPointMutex_.unlock();
 				//request hand skeleton redraw
-				mainWnd->update();
+				emit updateHandSkeleton();
 			}
 
 			// we must release the frame

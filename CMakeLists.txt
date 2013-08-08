@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.10)
 
 project (VirtualTouchScreen)
 
-set (CMAKE_PREFIX_PATH "D:/Qt/Qt5.1.0_32/5.1.0/msvc2012")
+set (CMAKE_PREFIX_PATH "D:/Qt/Qt5.1.0/5.1.0/msvc2012")
 SET (PCSDK_DIR "D:/Program Files (x86)/Intel/PCSDK")
 SET (OpenCV_DIR "D:/opencv/build")
 

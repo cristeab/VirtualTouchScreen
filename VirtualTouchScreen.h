@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <QPoint>
 #include <QVector>
+#include <QMutex>
 #include "util_pipeline.h"
 
 class GestureThread;
@@ -45,6 +46,7 @@ private:
 	float scaleFactor;
 	ConfigDialog *config;
 	QVector<QPoint> handSkeletonPoints_;
+	QMutex skeletonPointMutex_;
 };
 
 #endif // VirtualTouchScreen_H

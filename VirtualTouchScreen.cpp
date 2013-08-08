@@ -41,6 +41,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
 	gestureThread = new GestureThread(this);
+	connect(gestureThread, SIGNAL(updateHandSkeleton()), this, SLOT(update()));
 	gestureThread->start();
 
 	resize(gestureAlgos->imageSize());//TODO: should use a different approach
@@ -187,12 +188,14 @@ void VirtualTouchScreen::paintEvent(QPaintEvent*)
 	// Draw Hand Skeleton
 	//TODO: data synchronization needed
 	//TODO: the center of the hand should be always displayed
+	skeletonPointMutex_.lock();
 	drawLine(p, Hand::ELBOW,  Hand::CENTER);
 	drawLine(p, Hand::CENTER, Hand::THUMB);
 	drawLine(p, Hand::CENTER, Hand::INDEX);
 	drawLine(p, Hand::CENTER, Hand::MIDDLE);
 	drawLine(p, Hand::CENTER, Hand::RING);
 	drawLine(p, Hand::CENTER, Hand::PINKY);
+	skeletonPointMutex_.unlock();
 
 	//set image on the window
 	if (!pix.isNull()) {

@@ -19,6 +19,7 @@ signals:
 	void moveHand(const QPoint pt);
 	void tap(const QPoint &pt);
 	void showCoords(const QPoint &pt);
+	void updateHandSkeleton();
 private:
 	void setupPipeline();
 	MyPipeline *pipeline;
