@@ -30,6 +30,9 @@ public:
 				pres->onSwipe(VK_LEFT);
 			}
 			break;
+		case PXCGesture::Gesture::LABEL_HAND_CIRCLE:
+			qDebug() << "Gesture detected: circle";
+			break;
 		default:
 			(void)0;
 		}
@@ -99,6 +102,9 @@ void GestureThread::run()
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
+				qDebug() << "center: x = " << handNode.positionImage.x << 
+						", y = " << handNode.positionImage.y;
+
 				refHandPos.setX(handNode.positionImage.x);
 				refHandPos.setY(handNode.positionImage.y);
 				float depth = static_cast<float>(handNode.positionWorld.y);
