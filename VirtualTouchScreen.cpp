@@ -24,7 +24,6 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 
 	loadSettings();
-	//loadPointer(pointerIconPath, pointerSize);
 
 	//get screen size
 	QDesktopWidget *desktop = QApplication::desktop();

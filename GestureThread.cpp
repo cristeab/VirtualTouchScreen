@@ -14,59 +14,40 @@ public:
 	}
 	void PXCAPI OnGesture(PXCGesture::Gesture *data)
 	{
-		switch (data->label)
-		{
-		case PXCGesture::Gesture::LABEL_NAV_SWIPE_LEFT:
+		if (data->label & PXCGesture::Gesture::LABEL_NAV_SWIPE_LEFT) {
 			qDebug() << "Gesture detected: swipe left";
 			if (NULL != pres)
 			{
 				pres->onSwipe(VK_RIGHT);//more natural swipe
 			}
-			break;
-		case PXCGesture::Gesture::LABEL_NAV_SWIPE_RIGHT:
+		} else if (data->label & PXCGesture::Gesture::LABEL_NAV_SWIPE_RIGHT) {
 			qDebug() << "Gesture detected: swipe right";
 			if (NULL != pres)
 			{
 				pres->onSwipe(VK_LEFT);
 			}
-			break;
-		case PXCGesture::Gesture::LABEL_HAND_CIRCLE:
+		} else if (data->label & PXCGesture::Gesture::LABEL_HAND_CIRCLE) {
 			qDebug() << "Gesture detected: circle";
-			break;
-		default:
-			(void)0;
 		}
 	}
 	void PXCAPI OnAlert(PXCGesture::Alert *alert)
 	{
-		switch (alert->label)
-		{
-		case PXCGesture::Alert::LABEL_FOV_BOTTOM:
+		if (alert->label & PXCGesture::Alert::LABEL_FOV_BOTTOM) {
 			qDebug() << "The tracking object touches the bottom field of view";
-			break;
-		case PXCGesture::Alert::LABEL_FOV_LEFT:
+		} else if (alert->label & PXCGesture::Alert::LABEL_FOV_LEFT) {
 			qDebug() << "The tracking object touches the left field of view";
-			break;
-		case PXCGesture::Alert::LABEL_FOV_RIGHT:
+		} else if (alert->label & PXCGesture::Alert::LABEL_FOV_RIGHT) {
 			qDebug() << "The tracking object touches the right field of view";
-			break;
-		case PXCGesture::Alert::LABEL_FOV_TOP:
+		} else if (alert->label & PXCGesture::Alert::LABEL_FOV_TOP) {
 			qDebug() << "The tracking object touches the top field of view";
-			break;
-		case PXCGesture::Alert::LABEL_FOV_OK:
+		} else if (alert->label & PXCGesture::Alert::LABEL_FOV_OK) {
 			qDebug() << "The tracking object is within field of view";
-			break;
-		case PXCGesture::Alert::LABEL_FOV_BLOCKED:
+		} else if (alert->label & PXCGesture::Alert::LABEL_FOV_BLOCKED) {
 			qDebug() << "The field of view is blocked";
-			break;
-		case PXCGesture::Alert::LABEL_GEONODE_ACTIVE:
+		} else if (alert->label & PXCGesture::Alert::LABEL_GEONODE_ACTIVE) {
 			qDebug() << "The tracking object is found";
-			break;
-		case PXCGesture::Alert::LABEL_GEONODE_INACTIVE:
+		} else if (alert->label & PXCGesture::Alert::LABEL_GEONODE_INACTIVE) {
 			qDebug() << "The tracking object is lost";
-			break;
-		default:
-			(void)0;
 		}
 	}
 private:
@@ -136,16 +117,10 @@ void GestureThread::run()
 					emit showCoords(x, y);
 				}*/
 				//check hand status
-				switch (handNode.opennessState)
-				{
-				case PXCGesture::GeoNode::Openness::LABEL_OPEN:
+				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {
 					qDebug() << "hand open";
-					break;
-				case PXCGesture::GeoNode::Openness::LABEL_CLOSE:
+				} else if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_CLOSE) {
 					qDebug() << "hand closed";
-					break;
-				default:
-					(void)0;
 				}
 			} else {
 				updateHand = false;
