@@ -39,13 +39,10 @@ public:
 	void filterLowPass(float &depth);
 	template<typename T>
 	void filterDiff(T &depth, T &diffState);
-	//gestures
-	bool isTap(const QPoint &pt, float depth);
-	bool isPressAndHold(const QPoint &pt, float depth);
-	bool isSlide(const QPoint &pt, float depth);
-	bool isPinch(const QPoint &pt, float depth);
-	bool isStretch(const QPoint &pt, float depth);
-	//swipe, swipe from edge and turn are implemented in GestureThread
+	//detect when the hand touches the virtual touch screen
+	//the OS decides which gesture has been made
+	enum TouchType {NONE = 0, SINGLE_DOWN, SINGLE_UP, DOUBLE_DOWN, DOUBLE_UP};
+	TouchType isTouch(const QPoint &ptThumb, const QPoint &ptIndex, float depth);
 private:
 	int initKalman();
 	struct BiquadState {

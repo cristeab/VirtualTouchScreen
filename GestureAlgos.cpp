@@ -167,22 +167,19 @@ void GestureAlgos::filterDiff(T &depth, T &prevDepth)
 	prevDepth = tmp;
 }
 
-bool GestureAlgos::isTap(const QPoint &pt, float depth)
+GestureAlgos::TouchType GestureAlgos::isTouch(const QPoint &ptThumb, const QPoint &ptIndex, float depth)
 {
 	//constants
 	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
-	const static int DIFF_POS_THRESHOLD = 20;
-	const static int MAX_OBS_DURATION = 20;
+	const static float DIFF_DIST_THRESHOLD = static_cast<float>(0.01);
 	//permanent variables
-	static int obsDuration = 0;
 	static int varSign = 0;
-	static float prevDepth = static_cast<float>(0);
-	static int prevX = 0;
-	static int prevY = 0;
+	static float prevDepth = static_cast<float>(0.0);
+	static float prevDist = static_cast<float>(0.0);
+	static GestureAlgos::TouchType out = GestureAlgos::TouchType::NONE;
 
-	bool out = false;
-
-	filterDiff(depth, prevDepth);
+	//process depth information
+	filterDiff(depth, prevDepth);//differentiator (high pass filter)
 	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
 	{
 		int sign = static_cast<int>((depth)/qAbs(depth));
@@ -190,165 +187,37 @@ bool GestureAlgos::isTap(const QPoint &pt, float depth)
 		{
 			//variation detected
 			varSign = sign;
-			obsDuration = 0;
 		}
 		else if (varSign != sign)
 		{
 			//sign change detected
-			if (-1 == varSign) {
-				out = true;
-				varSign = 0;
-			} else {
-				varSign = -varSign;
-				obsDuration = 0;
-			}
+			varSign = -varSign;
 		}
 	}
 
-	//check the position of the hand (helps reducing the false alarms)
-	int x = pt.x();
-	int y = pt.y();
-	filterDiff(x, prevX);
-	filterDiff(y, prevY);
-	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
-		varSign = 0;//not a tap
-	}
+	//process distance between fingers (thumb and index information)
+	//Kalman filtering might be done by the client
+	float dist = std::sqrtf(std::pow(ptThumb.x()-ptIndex.x(), static_cast<float>(2.0))+
+		std::pow(ptThumb.y()-ptIndex.y(), static_cast<float>(2.0)));
+	filterDiff(dist, prevDist);
 
-	//increment the observation duration once the hand is closer to the camera
-	if (-1 == varSign)
-	{
-		++obsDuration;
-	}
-	//tap duration cannot exceed the maximum observation duration
-	if (MAX_OBS_DURATION < obsDuration)
-	{
+	//virtual touch screen
+	if (-1 == varSign) {
+		//touch down
+		if (GestureAlgos::TouchType::NONE == out) {
+			out = (qAbs(dist) > DIFF_DIST_THRESHOLD)?GestureAlgos::TouchType::DOUBLE_DOWN:GestureAlgos::TouchType::SINGLE_DOWN;
+		}
+	} else if (1 == varSign) {
+		//touch up
+		if (GestureAlgos::TouchType::DOUBLE_DOWN == out) {
+			out = GestureAlgos::TouchType::DOUBLE_UP;
+		} else if (GestureAlgos::TouchType::SINGLE_DOWN == out) {
+			out = GestureAlgos::TouchType::SINGLE_UP;
+		}
 		varSign = 0;
+	} else {
+		out = GestureAlgos::TouchType::NONE;
 	}
 
 	return out;
-}
-
-bool GestureAlgos::isPressAndHold(const QPoint &pt, float depth)
-{
-	//constants
-	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
-	const static int DIFF_POS_THRESHOLD = 20;
-	const static int MAX_OBS_DURATION = 50;
-	//permanent variables
-	static int obsDuration = 0;
-	static int varSign = 0;
-	static float prevDepth = static_cast<float>(0);
-	static int prevX = 0;
-	static int prevY = 0;
-
-	bool out = false;
-
-	filterDiff(depth, prevDepth);
-	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
-	{
-		int sign = static_cast<int>((depth)/qAbs(depth));
-		if (0 == varSign)
-		{
-			//variation detected
-			varSign = sign;
-			obsDuration = 0;
-		}
-		else if (varSign != sign)
-		{
-			//sign change detected
-			varSign = -varSign;
-			obsDuration = 0;
-		}
-	}
-
-	//check the position of the hand (helps reducing the false alarms)
-	int x = pt.x();
-	int y = pt.y();
-	filterDiff(x, prevX);
-	filterDiff(y, prevY);
-	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
-		varSign = 0;//not a tap
-	}
-
-	if (-1 == varSign)
-	{
-		//press detected
-		++obsDuration;
-		if (MAX_OBS_DURATION < obsDuration)
-		{
-			out = true;
-			varSign = 0;
-		}
-	}
-
-	return out;
-}
-
-bool GestureAlgos::isSlide(const QPoint &pt, float depth)
-{
-	//constants
-	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.015);
-	const static int DIFF_POS_THRESHOLD = 20;
-	const static int MAX_OBS_DURATION = 35;
-	//permanent variables
-	static int obsDuration = 0;
-	static bool slideDetected = false;
-	static int varSign = 0;
-	static float prevDepth = static_cast<float>(0);
-	static int prevX = 0;
-	static int prevY = 0;
-
-	bool out = false;
-
-	filterDiff(depth, prevDepth);
-	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
-	{
-		int sign = static_cast<int>((depth)/qAbs(depth));
-		if (0 == varSign)
-		{
-			//variation detected
-			varSign = sign;
-			obsDuration = 0;
-			slideDetected = false;
-		}
-		else if (varSign != sign)
-		{
-			//sign change detected
-			varSign = -varSign;
-			obsDuration = 0;
-			slideDetected = false;
-		}
-	}
-
-	//check the position of the hand (helps reducing the false alarms)
-	int x = pt.x();
-	int y = pt.y();
-	filterDiff(x, prevX);
-	filterDiff(y, prevY);
-	if ((qAbs(x) > DIFF_POS_THRESHOLD) || (qAbs(y) > DIFF_POS_THRESHOLD)) {
-		slideDetected = true;
-	}
-
-	if (-1 == varSign)
-	{
-		//press detected
-		++obsDuration;
-		if ((MAX_OBS_DURATION < obsDuration) && slideDetected)
-		{
-			out = true;
-			varSign = 0;
-		}
-	}
-
-	return out;
-}
-
-bool GestureAlgos::isPinch(const QPoint &pt, float depth)
-{
-	return false;
-}
-
-bool GestureAlgos::isStretch(const QPoint &pt, float depth)
-{
-	return false;
 }

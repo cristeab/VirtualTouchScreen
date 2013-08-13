@@ -80,6 +80,7 @@ void GestureThread::run()
 			//hand position
 			PXCGesture::GeoNode handNode;
 			QPoint refHandPos;
+			float depth = 0;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
@@ -88,16 +89,18 @@ void GestureThread::run()
 
 				refHandPos.setX(handNode.positionImage.x);
 				refHandPos.setY(handNode.positionImage.y);
-				float depth = static_cast<float>(handNode.positionWorld.y);
+				depth = static_cast<float>(handNode.positionWorld.y);
 
 				//convert to screen coordinates
 				QPoint handPos = refHandPos;//TODO: remove this
 				mainWnd->gestureAlgos->imageToScreen(handPos);
 
-				//filter data
+				//filter hand coordinates (center only for now)
 				if (EXIT_FAILURE == mainWnd->gestureAlgos->filterKalman(handPos)) {
 					qDebug() << "error in Kalman filter";
 				}
+
+				//filter depth information: low pass filtering in order to remove high frequency components
 				mainWnd->gestureAlgos->filterLowPass(depth);
 
 				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << handPos.x()
@@ -105,17 +108,6 @@ void GestureThread::run()
 
 				//move cursor to the new position
 				emit moveHand(handPos);//TODO: no window movement
-				//check for tap
-				if(mainWnd->gestureAlgos->isTap(handPos, depth))
-				{
-					qDebug() << "tap detected";
-					emit tap(handPos);
-				}
-				//display coordinates if requested
-				/*if (mainWnd->showCoords)
-				{
-					emit showCoords(x, y);
-				}*/
 				//check hand status
 				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {
 					qDebug() << "hand open";
@@ -187,6 +179,27 @@ void GestureThread::run()
 				mainWnd->skeletonPointMutex_.unlock();
 				//request hand skeleton redraw
 				emit updateHandSkeleton();
+				//detect gesture
+				switch (mainWnd->gestureAlgos->isTouch(mainWnd->handSkeletonPoints_[0],
+					mainWnd->handSkeletonPoints_[1], depth))
+				{
+				case GestureAlgos::TouchType::DOUBLE_DOWN:
+					qDebug() << "double touch down";
+					//emit tap(handPos);
+					break;
+				case GestureAlgos::TouchType::SINGLE_DOWN:
+					qDebug() << "single touch down";
+					break;
+				case GestureAlgos::TouchType::DOUBLE_UP:
+					qDebug() << "double touch up";
+					//emit tap(handPos);
+					break;
+				case GestureAlgos::TouchType::SINGLE_UP:
+					qDebug() << "single touch up";
+					break;
+				default:
+					(void)0;
+				}
 			}
 
 			// we must release the frame
