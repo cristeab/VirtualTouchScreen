@@ -10,6 +10,7 @@
 
 class GestureThread;
 class GestureAlgos;
+class TouchInputEmulator;
 class ConfigDialog;
 
 class VirtualTouchScreen : public QMainWindow
@@ -27,9 +28,12 @@ public slots:
 	void showMenu();
 	void showHelp();
 	void onMoveHand(const QPoint pt);
-	void onTap(const QPoint &pt);
-	void onShowCoords(const QPoint &pt);
 	void onSwipe(BYTE code);
+	//touch screen slots
+	void onTouchDown(const QPoint &ptThumb, const QPoint &ptIndex);
+	void onTouchDown(const QPoint &ptIndex);
+	void onTouchUp(const QPoint &ptThumb, const QPoint &ptIndex);
+	void onTouchUp(const QPoint &ptIndex);
 
 protected:
 	void paintEvent(QPaintEvent*);
@@ -47,6 +51,7 @@ private:
 	ConfigDialog *config;
 	QVector<QPoint> handSkeletonPoints_;
 	QMutex skeletonPointMutex_;
+	TouchInputEmulator *touch_;
 };
 
 #endif // VirtualTouchScreen_H

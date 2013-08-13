@@ -61,6 +61,15 @@ GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(),
 	connect(this, SIGNAL(moveHand(const QPoint)), mainWnd, SLOT(onMoveHand(const QPoint)));
 	connect(this, SIGNAL(tap(const QPoint&)), mainWnd, SLOT(onTap(const QPoint&)));
 	connect(this, SIGNAL(showCoords(const QPoint&)), mainWnd, SLOT(onShowCoords(const QPoint&)));
+	//link touch signals with the corresponding slots in the main window
+	connect(this, SIGNAL(touchDown(const QPoint&, const QPoint&)), mainWnd, 
+		SLOT(onTouchDown(const QPoint&, const QPoint&)));
+	connect(this, SIGNAL(touchDown(const QPoint&)), mainWnd, 
+		SLOT(onTouchDown(const QPoint&)));
+	connect(this, SIGNAL(touchUp(const QPoint&, const QPoint&)), mainWnd, 
+		SLOT(onTouchUp(const QPoint&, const QPoint&)));
+	connect(this, SIGNAL(touchUp(const QPoint&)), mainWnd, 
+		SLOT(onTouchUp(const QPoint&)));
 }
 
 GestureThread::~GestureThread()
@@ -185,17 +194,20 @@ void GestureThread::run()
 				{
 				case GestureAlgos::TouchType::DOUBLE_DOWN:
 					qDebug() << "double touch down";
-					//emit tap(handPos);
+					emit touchDown(mainWnd->handSkeletonPoints_[0], mainWnd->handSkeletonPoints_[1]);
 					break;
 				case GestureAlgos::TouchType::SINGLE_DOWN:
 					qDebug() << "single touch down";
+					emit touchDown(mainWnd->handSkeletonPoints_[1]);
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
 					qDebug() << "double touch up";
+					emit touchUp(mainWnd->handSkeletonPoints_[0], mainWnd->handSkeletonPoints_[1]);
 					//emit tap(handPos);
 					break;
 				case GestureAlgos::TouchType::SINGLE_UP:
 					qDebug() << "single touch up";
+					emit touchUp(mainWnd->handSkeletonPoints_[1]);
 					break;
 				default:
 					(void)0;

@@ -9,6 +9,7 @@
 #include "GestureThread.h"
 #include "GestureAlgos.h"
 #include "VirtualTouchScreen.h"
+#include "TouchInputEmulator.h"
 //#include "ConfigDialog.h"
 
 #define APPLICATION_NAME "Virtual Touch Screen"
@@ -19,7 +20,8 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	offset(OFFSET_X,OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
 	config(NULL),
-	handSkeletonPoints_(Hand::POINTS)
+	handSkeletonPoints_(Hand::POINTS),
+	touch_(new TouchInputEmulator())
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 
@@ -51,6 +53,7 @@ VirtualTouchScreen::~VirtualTouchScreen()
 	gestureThread->terminate();
 	gestureThread->wait();
 	delete gestureThread;
+	delete touch_;
 	delete config;
 	saveSettings();
 }
@@ -127,22 +130,38 @@ void VirtualTouchScreen::onMoveHand(const QPoint pt)
 	move(pt.x(), pt.y());
 }
 
-void VirtualTouchScreen::onTap(const QPoint &pt)
-{
-	qDebug() << "onTap: mouse event";
-	mouse_event(MOUSEEVENTF_LEFTDOWN, pt.x(), pt.y(), 0, 0);
-	mouse_event(MOUSEEVENTF_LEFTUP, pt.x(), pt.y(), 0, 0);
-}
-
 void VirtualTouchScreen::onSwipe(BYTE code)
 {
 	keybd_event(code & 0xff, 0, 0, 0);
 	keybd_event(code & 0xff, 0, KEYEVENTF_KEYUP, 0);
 }
 
-void VirtualTouchScreen::onShowCoords(const QPoint &pt)
+void VirtualTouchScreen::onTouchDown(const QPoint &ptThumb, const QPoint &ptIndex)
 {
-	//config->showCoords(x, y);
+	if ((NULL != touch_) && (EXIT_FAILURE == touch_->touchDown(ptThumb, ptIndex))) {
+		qDebug() << "Cannot send double touch down";
+	}
+}
+
+void VirtualTouchScreen::onTouchDown(const QPoint &ptIndex)
+{
+	if ((NULL != touch_) && (EXIT_FAILURE == touch_->touchDown(ptIndex))) {
+		qDebug() << "Cannot send single touch down";
+	}
+}
+
+void VirtualTouchScreen::onTouchUp(const QPoint &ptThumb, const QPoint &ptIndex)
+{
+	if ((NULL != touch_) && (EXIT_FAILURE == touch_->touchUp(ptThumb, ptIndex))) {
+		qDebug() << "Cannot send double touch down";
+	}
+}
+
+void VirtualTouchScreen::onTouchUp(const QPoint &ptIndex)
+{
+	if ((NULL != touch_) && (EXIT_FAILURE == touch_->touchUp(ptIndex))) {
+		qDebug() << "Cannot send single touch down";
+	}
 }
 
 #define COMPANY_NAME "Bogdan Cristea"

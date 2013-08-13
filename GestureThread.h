@@ -20,6 +20,11 @@ signals:
 	void tap(const QPoint &pt);
 	void showCoords(const QPoint &pt);
 	void updateHandSkeleton();
+	//touch signals
+	void touchDown(const QPoint &ptThumb, const QPoint &ptIndex);
+	void touchDown(const QPoint &ptIndex);
+	void touchUp(const QPoint &ptThumb, const QPoint &ptIndex);
+	void touchUp(const QPoint &ptIndex);
 private:
 	void setupPipeline();
 	MyPipeline *pipeline;
