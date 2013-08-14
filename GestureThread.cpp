@@ -59,8 +59,6 @@ GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(),
 {
 	setupPipeline();
 	connect(this, SIGNAL(moveHand(const QPoint)), mainWnd, SLOT(onMoveHand(const QPoint)));
-	connect(this, SIGNAL(tap(const QPoint&)), mainWnd, SLOT(onTap(const QPoint&)));
-	connect(this, SIGNAL(showCoords(const QPoint&)), mainWnd, SLOT(onShowCoords(const QPoint&)));
 	//link touch signals with the corresponding slots in the main window
 	connect(this, SIGNAL(touchDown(const QPoint&, const QPoint&)), mainWnd, 
 		SLOT(onTouchDown(const QPoint&, const QPoint&)));
@@ -90,6 +88,7 @@ void GestureThread::run()
 			PXCGesture::GeoNode handNode;
 			QPoint refHandPos;
 			float depth = 0;
+			float depthTouch = 0;//difference between the depth of the thumb and the index
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
@@ -136,23 +135,28 @@ void GestureThread::run()
 						switch (fingerNode[i].body & PXCGesture::GeoNode::LABEL_MASK_DETAILS) {
 						case PXCGesture::GeoNode::LABEL_FINGER_THUMB:
 							qDebug() << "thumb: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y;
+								", y = " << fingerNode[i].positionImage.y <<
+								", depth = " << fingerNode[i].positionWorld.y;
 							break;
 						case PXCGesture::GeoNode::LABEL_FINGER_INDEX:
 							qDebug() << "index: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y;
+								", y = " << fingerNode[i].positionImage.y <<
+								", depth = " << fingerNode[i].positionWorld.y;
 							break;
 						case PXCGesture::GeoNode::LABEL_FINGER_MIDDLE:
 							qDebug() << "middle: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y;
+								", y = " << fingerNode[i].positionImage.y <<
+								", depth = " << fingerNode[i].positionWorld.y;
 							break;
 						case PXCGesture::GeoNode::LABEL_FINGER_RING:
 							qDebug() << "ring: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y;
+								", y = " << fingerNode[i].positionImage.y <<
+								", depth = " << fingerNode[i].positionWorld.y;
 							break;
 						case PXCGesture::GeoNode::LABEL_FINGER_PINKY:
 							qDebug() << "pinky: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y;
+								", y = " << fingerNode[i].positionImage.y <<
+								", depth = " << fingerNode[i].positionWorld.y;
 							break;
 						default:
 							updateHand = false;
@@ -189,6 +193,8 @@ void GestureThread::run()
 				//request hand skeleton redraw
 				emit updateHandSkeleton();
 				//detect gesture
+				depthTouch = fingerNode[0].positionWorld.y-fingerNode[1].positionWorld.y;
+				qDebug() << "depthTouch" << depthTouch;
 				switch (mainWnd->gestureAlgos->isTouch(mainWnd->handSkeletonPoints_[0],
 					mainWnd->handSkeletonPoints_[1], depth))
 				{

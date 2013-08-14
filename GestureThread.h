@@ -17,8 +17,6 @@ protected:
 	void run();
 signals:
 	void moveHand(const QPoint pt);
-	void tap(const QPoint &pt);
-	void showCoords(const QPoint &pt);
 	void updateHandSkeleton();
 	//touch signals
 	void touchDown(const QPoint &ptThumb, const QPoint &ptIndex);
