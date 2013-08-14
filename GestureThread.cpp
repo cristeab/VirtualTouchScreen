@@ -86,9 +86,9 @@ void GestureThread::run()
 
 			//hand position
 			PXCGesture::GeoNode handNode;
-			QPoint refHandPos;			
-			float depthThumb = 0;
-			float depthIndex = 0;
+			QPointF refHandPos;			
+			qreal depthThumb = 0;
+			qreal depthIndex = 0;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
@@ -99,7 +99,7 @@ void GestureThread::run()
 				refHandPos.setY(handNode.positionImage.y);				
 
 				//convert to screen coordinates
-				QPoint handPos = refHandPos;//TODO: remove this
+				QPointF handPos = refHandPos;//TODO: remove this
 				mainWnd->gestureAlgos->imageToScreen(handPos);
 
 				//filter hand coordinates (center only for now)
@@ -115,7 +115,7 @@ void GestureThread::run()
 					<< "," << handNode.positionWorld.y << ")";
 
 				//move cursor to the new position
-				emit moveHand(handPos);//TODO: no window movement
+				emit moveHand(handPos.toPoint());//TODO: no window movement
 				//check hand status
 				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {
 					qDebug() << "hand open";
@@ -201,20 +201,22 @@ void GestureThread::run()
 				{
 				case GestureAlgos::TouchType::DOUBLE_DOWN:
 					qDebug() << "double touch down";
-					emit touchDown(mainWnd->handSkeletonPoints_[0], mainWnd->handSkeletonPoints_[1]);
+					emit touchDown(mainWnd->handSkeletonPoints_[0].toPoint(), 
+						mainWnd->handSkeletonPoints_[1].toPoint());
 					break;
 				case GestureAlgos::TouchType::SINGLE_DOWN:
 					qDebug() << "single touch down";
-					emit touchDown(mainWnd->handSkeletonPoints_[1]);
+					emit touchDown(mainWnd->handSkeletonPoints_[1].toPoint());
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
 					qDebug() << "double touch up";
-					emit touchUp(mainWnd->handSkeletonPoints_[0], mainWnd->handSkeletonPoints_[1]);
+					emit touchUp(mainWnd->handSkeletonPoints_[0].toPoint(), 
+						mainWnd->handSkeletonPoints_[1].toPoint());
 					//emit tap(handPos);
 					break;
 				case GestureAlgos::TouchType::SINGLE_UP:
 					qDebug() << "single touch up";
-					emit touchUp(mainWnd->handSkeletonPoints_[1]);
+					emit touchUp(mainWnd->handSkeletonPoints_[1].toPoint());
 					break;
 				default:
 					(void)0;

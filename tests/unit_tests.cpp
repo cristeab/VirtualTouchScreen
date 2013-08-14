@@ -11,7 +11,7 @@ private slots:
 	void filterLowPass();
 	void isTouch();
 private:
-	int getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
+	int getData(QVector<int> &x, QVector<int> &y, QVector<qreal> &depth, 
 		const QString &fileName);
 };
 
@@ -19,7 +19,7 @@ void TestGestureAlgos::imageToScreenFilterKalman()
 {
 	GestureAlgos *algos = GestureAlgos::instance();
 	QVERIFY(NULL != algos);
-	QPoint pt(0, 0);
+	QPointF pt(0, 0);
 	QVERIFY(EXIT_FAILURE == algos->filterKalman(pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setScreenSize(QSize(1024, 768));
@@ -42,12 +42,12 @@ void TestGestureAlgos::filterLowPass()
 	GestureAlgos *algos = GestureAlgos::instance();
 	QVERIFY(NULL != algos);
 
-	float fn = static_cast<float>(0.1);
-	const static float PI = static_cast<float>(3.1415926535);
-	const static float TOL = static_cast<float>(1e-3);
+	qreal fn = 0.1;
+	const static qreal PI = 3.1415926535;
+	const static qreal TOL = 1e-3;
 	int nbSamp = static_cast<int>(10/fn);
-	float val = 0;
-	float sum = 0;
+	qreal val = 0;
+	qreal sum = 0;
 	for (int n = 0; n < nbSamp; ++n) {
 		val = sin(2*PI*fn*n);
 		algos->filterLowPass(val);
@@ -55,7 +55,7 @@ void TestGestureAlgos::filterLowPass()
 	}
 	QVERIFY(fabs(48.5314 - sum) < TOL);
 
-	fn = static_cast<float>(0.4);
+	fn = 0.4;
 	nbSamp = static_cast<int>(10/fn);
 	sum = 0;
 	for (int n = 0; n < nbSamp; ++n) {
@@ -66,7 +66,7 @@ void TestGestureAlgos::filterLowPass()
 	QVERIFY(fabs(1.58709 - sum) < TOL);
 }
 
-int TestGestureAlgos::getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
+int TestGestureAlgos::getData(QVector<int> &x, QVector<int> &y, QVector<qreal> &depth, 
 		const QString &fileName)
 {
 	QFile file(fileName);
@@ -97,7 +97,7 @@ void TestGestureAlgos::isTouch()
 {
 	/*QVector<int> x;
 	QVector<int> y;
-	QVector<float> depth;
+	QVector<qreal> depth;
 	QVERIFY(EXIT_SUCCESS == getData(x, y, depth, "../../tests/ULTRABOOK-BC_vts8_tap.LOG"));
 
 	GestureAlgos *algos = GestureAlgos::instance();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QPoint>
+#include <QPointF>
 #include <QSize>
 #include "opencv2/video/tracking.hpp"
 
@@ -19,28 +19,28 @@ public:
 	void setImageSize(const QSize &image) {
 		image_ = image;
 	}
-	QPoint imageCenter() const {
-		return QPoint(image_.width()/2, image_.height()/2);
+	QPointF imageCenter() const {
+		return QPointF(image_.width()/2.0, image_.height()/2.0);
 	}
 	QSize imageSize() const {
 		return image_;
 	}
-	void setCorrectionFactors(float scaleFactor, const QPoint &offset) {
+	void setCorrectionFactors(qreal scaleFactor, const QPointF &offset) {
 		scaleFactor_ = scaleFactor;
 		offset_ = offset;
 	}
 	//transforms to screen coordinates
-	int imageToScreen(QPoint &pt);
+	int imageToScreen(QPointF &pt);
 	//transforms absolute finger coordinates to coordinates relative to the center of the hand which is 
 	//at the fixed position (imgW/2, imgH/2)
-	int toHandCenter(QPoint &pt, const QPoint &handPos);
+	int toHandCenter(QPointF &pt, const QPointF &handPos);
 	//filters
-	int filterKalman(QPoint &pt);
-	void filterLowPass(float &depth);
+	int filterKalman(QPointF &pt);
+	void filterLowPass(qreal &depth);
 	//detect when the hand touches the virtual touch screen
 	//the OS decides which gesture has been made
 	enum TouchType {NONE = 0, SINGLE_DOWN, SINGLE_UP, DOUBLE_DOWN, DOUBLE_UP};
-	TouchType isTouch(float depthThumb, float depthIndex);
+	TouchType isTouch(qreal depthThumb, qreal depthIndex);
 private:
 	int initKalman();
 	struct BiquadState {
@@ -56,10 +56,10 @@ private:
 	BiquadState biquadState[SosMat::NB_BIQUADS];
 	QSize screen_;
 	QSize image_;
-	float scaleFactor_;
-	QPoint offset_;
+	qreal scaleFactor_;
+	QPointF offset_;
 	cv::KalmanFilter KF_;
-	cv::Mat_<float> measurement_;
+	cv::Mat_<qreal> measurement_;
 	GestureAlgos(const GestureAlgos&);
 	GestureAlgos& operator=(const GestureAlgos&);
 	~GestureAlgos() {};

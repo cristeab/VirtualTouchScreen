@@ -18,11 +18,11 @@ int GestureAlgos::initKalman()
 	}
 	//setup Kalman filter
 	measurement_.setTo(cv::Scalar(0));
-	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;
-	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;
-	KF_.statePre.at<float>(2) = 0;
-	KF_.statePre.at<float>(3) = 0;
-	KF_.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
+	KF_.statePre.at<qreal>(0) = static_cast<qreal>(screen_.width())/2.0;
+	KF_.statePre.at<qreal>(1) = static_cast<qreal>(screen_.height())/2.0;
+	KF_.statePre.at<qreal>(2) = 0;
+	KF_.statePre.at<qreal>(3) = 0;
+	KF_.transitionMatrix = *(cv::Mat_<qreal>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
 	setIdentity(KF_.measurementMatrix);
 	setIdentity(KF_.processNoiseCov, cv::Scalar::all(1e-4));
 	setIdentity(KF_.measurementNoiseCov, cv::Scalar::all(1e-1));
@@ -30,13 +30,13 @@ int GestureAlgos::initKalman()
 	return EXIT_SUCCESS;
 }
 
-int GestureAlgos::imageToScreen(QPoint &pt)
+int GestureAlgos::imageToScreen(QPointF &pt)
 {
 	int rc = EXIT_SUCCESS;
 
 	//convert to double in order to have the highest precision
-	double x = pt.x();
-	double y = pt.y();
+	qreal x = pt.x();
+	qreal y = pt.y();
 
 	//convert from image coodinates to screen coordinates
 	if ((0 < image_.width()) && (0 < image_.height()))
@@ -64,13 +64,13 @@ int GestureAlgos::imageToScreen(QPoint &pt)
 	else if (screen_.height() < y) y = screen_.height()-10;
 
 	//convert back to integers
-	pt.setX(static_cast<int>(x));
-	pt.setY(static_cast<int>(y));
+	pt.setX(x);
+	pt.setY(y);
 
 	return rc;
 }
 
-int GestureAlgos::toHandCenter(QPoint &pt, const QPoint &handPos)
+int GestureAlgos::toHandCenter(QPointF &pt, const QPointF &handPos)
 {
 	if ((0 >= image_.width()) || (0 >= image_.height())) {
 		qDebug() << "either image width or image height is not initialized";
@@ -86,7 +86,7 @@ int GestureAlgos::toHandCenter(QPoint &pt, const QPoint &handPos)
 	return EXIT_SUCCESS;
 }
 
-int GestureAlgos::filterKalman(QPoint &pt)
+int GestureAlgos::filterKalman(QPointF &pt)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -97,13 +97,13 @@ int GestureAlgos::filterKalman(QPoint &pt)
 	}
 
 	KF_.predict();
-	measurement_(0) = static_cast<float>(pt.x());
-	measurement_(1) = static_cast<float>(pt.y());
+	measurement_(0) = pt.x();
+	measurement_(1) = pt.y();
 	cv::Mat estimated = KF_.correct(measurement_);
-	float tmp = estimated.at<float>(0);
-	pt.setX(static_cast<int>(tmp));
-	tmp = estimated.at<float>(1);
-	pt.setY(static_cast<int>(tmp));
+	qreal tmp = 0.0;
+	pt.setX(tmp);
+	tmp = 1.0;
+	pt.setY(tmp);
 
 	return EXIT_SUCCESS;
 }
@@ -145,7 +145,7 @@ double GestureAlgos::biquad(BiquadState *state, double in)
 	return out;
 }
 
-void GestureAlgos::filterLowPass(float &depth)
+void GestureAlgos::filterLowPass(qreal &depth)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -156,13 +156,13 @@ void GestureAlgos::filterLowPass(float &depth)
 	for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
 		depth = biquad(biquadState+n, depth);
 	}
-	depth = static_cast<float>(gain_*depth);
+	depth = gain_*depth;
 }
 
-GestureAlgos::TouchType GestureAlgos::isTouch(float depthThumb, float depthIndex)
+GestureAlgos::TouchType GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex)
 {
 	//constants
-	const static float DEPTH_THRESHOLD = static_cast<float>(0.45);
+	const static qreal DEPTH_THRESHOLD = 0.45;
 	//permanent variable
 	static GestureAlgos::TouchType out = GestureAlgos::TouchType::NONE;
 

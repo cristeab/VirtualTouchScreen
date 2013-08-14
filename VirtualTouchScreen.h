@@ -4,6 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include <Windows.h>
 #include <QPoint>
+#include <QPointF>
 #include <QVector>
 #include <QMutex>
 #include "util_pipeline.h"
@@ -49,7 +50,7 @@ private:
 	QPoint offset;
 	float scaleFactor;
 	ConfigDialog *config;
-	QVector<QPoint> handSkeletonPoints_;
+	QVector<QPointF> handSkeletonPoints_;
 	QMutex skeletonPointMutex_;
 	TouchInputEmulator *touch_;
 };
