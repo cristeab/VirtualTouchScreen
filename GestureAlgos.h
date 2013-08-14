@@ -59,7 +59,7 @@ private:
 	qreal scaleFactor_;
 	QPointF offset_;
 	cv::KalmanFilter KF_;
-	cv::Mat_<qreal> measurement_;
+	cv::Mat_<float> measurement_;
 	GestureAlgos(const GestureAlgos&);
 	GestureAlgos& operator=(const GestureAlgos&);
 	~GestureAlgos() {};

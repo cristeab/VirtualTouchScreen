@@ -18,11 +18,11 @@ int GestureAlgos::initKalman()
 	}
 	//setup Kalman filter
 	measurement_.setTo(cv::Scalar(0));
-	KF_.statePre.at<qreal>(0) = static_cast<qreal>(screen_.width())/2.0;
-	KF_.statePre.at<qreal>(1) = static_cast<qreal>(screen_.height())/2.0;
-	KF_.statePre.at<qreal>(2) = 0;
-	KF_.statePre.at<qreal>(3) = 0;
-	KF_.transitionMatrix = *(cv::Mat_<qreal>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
+	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;
+	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;
+	KF_.statePre.at<float>(2) = 0;
+	KF_.statePre.at<float>(3) = 0;
+	KF_.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
 	setIdentity(KF_.measurementMatrix);
 	setIdentity(KF_.processNoiseCov, cv::Scalar::all(1e-4));
 	setIdentity(KF_.measurementNoiseCov, cv::Scalar::all(1e-1));
@@ -97,12 +97,12 @@ int GestureAlgos::filterKalman(QPointF &pt)
 	}
 
 	KF_.predict();
-	measurement_(0) = pt.x();
-	measurement_(1) = pt.y();
+	measurement_(0) = static_cast<float>(pt.x());
+	measurement_(1) = static_cast<float>(pt.y());
 	cv::Mat estimated = KF_.correct(measurement_);
-	qreal tmp = 0.0;
+	qreal tmp = estimated.at<float>(0);
 	pt.setX(tmp);
-	tmp = 1.0;
+	tmp = estimated.at<float>(1);
 	pt.setY(tmp);
 
 	return EXIT_SUCCESS;
