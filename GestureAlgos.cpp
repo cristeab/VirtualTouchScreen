@@ -60,7 +60,7 @@ int GestureAlgos::imageToScreen(QPointF &pt)
 	//threshold coordinates
 	if (0 > x) x = 0.0;
 	else if (screen_.width() < x) x = screen_.width()-10;
-	if (0 > y) y = 0;
+	if (0 > y) y = 0.0;
 	else if (screen_.height() < y) y = screen_.height()-10;
 
 	//convert back to integers
@@ -77,11 +77,11 @@ int GestureAlgos::toHandCenter(QPointF &pt, const QPointF &handPos)
 		return EXIT_FAILURE;
 	}
 
-	pt.setX(image_.width()/2+pt.x()-handPos.x());
-	pt.setY(image_.height()/2+pt.y()-handPos.y());
+	qreal x = image_.width()/2.0+pt.x()-handPos.x();
+	pt.setY(image_.height()/2.0+pt.y()-handPos.y());
 
 	//invert X axis
-	pt.setX(image_.width()-pt.x());
+	pt.setX(image_.width()-x);
 
 	return EXIT_SUCCESS;
 }
