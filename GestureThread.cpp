@@ -86,9 +86,9 @@ void GestureThread::run()
 
 			//hand position
 			PXCGesture::GeoNode handNode;
-			QPoint refHandPos;
-			float depth = 0;
-			float depthTouch = 0;//difference between the depth of the thumb and the index
+			QPoint refHandPos;			
+			float depthThumb = 0;
+			float depthIndex = 0;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
@@ -96,8 +96,7 @@ void GestureThread::run()
 						", y = " << handNode.positionImage.y;
 
 				refHandPos.setX(handNode.positionImage.x);
-				refHandPos.setY(handNode.positionImage.y);
-				depth = static_cast<float>(handNode.positionWorld.y);
+				refHandPos.setY(handNode.positionImage.y);				
 
 				//convert to screen coordinates
 				QPoint handPos = refHandPos;//TODO: remove this
@@ -109,10 +108,11 @@ void GestureThread::run()
 				}
 
 				//filter depth information: low pass filtering in order to remove high frequency components
-				mainWnd->gestureAlgos->filterLowPass(depth);
+				//mainWnd->gestureAlgos->filterLowPass(depth);
 
-				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << handPos.x()
-					<< "," << handPos.y() << "," << depth << ")";
+				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << 
+					handNode.positionImage.x << "," << handNode.positionImage.y
+					<< "," << handNode.positionWorld.y << ")";
 
 				//move cursor to the new position
 				emit moveHand(handPos);//TODO: no window movement
@@ -192,11 +192,12 @@ void GestureThread::run()
 				mainWnd->skeletonPointMutex_.unlock();
 				//request hand skeleton redraw
 				emit updateHandSkeleton();
-				//detect gesture
-				depthTouch = fingerNode[0].positionWorld.y-fingerNode[1].positionWorld.y;
-				qDebug() << "depthTouch" << depthTouch;
-				switch (mainWnd->gestureAlgos->isTouch(mainWnd->handSkeletonPoints_[0],
-					mainWnd->handSkeletonPoints_[1], depth))
+
+				//detect touch gesture
+				depthThumb = static_cast<float>(fingerNode[0].positionWorld.y);
+				depthIndex = static_cast<float>(fingerNode[1].positionWorld.y);
+				//TODO: low pass filter both depths
+				switch (mainWnd->gestureAlgos->isTouch(depthThumb, depthIndex))
 				{
 				case GestureAlgos::TouchType::DOUBLE_DOWN:
 					qDebug() << "double touch down";

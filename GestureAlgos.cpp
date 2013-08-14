@@ -159,64 +159,32 @@ void GestureAlgos::filterLowPass(float &depth)
 	depth = static_cast<float>(gain_*depth);
 }
 
-template<typename T>
-void GestureAlgos::filterDiff(T &depth, T &prevDepth)
-{
-	T tmp = depth;
-	depth -= prevDepth;
-	prevDepth = tmp;
-}
-
-GestureAlgos::TouchType GestureAlgos::isTouch(const QPoint &ptThumb, const QPoint &ptIndex, float depth)
+GestureAlgos::TouchType GestureAlgos::isTouch(float depthThumb, float depthIndex)
 {
 	//constants
-	const static float DIFF_DEPTH_THRESHOLD = static_cast<float>(0.02);
-	const static float DIFF_DIST_THRESHOLD = static_cast<float>(0.01);
-	//permanent variables
-	static int varSign = 0;
-	static float prevDepth = static_cast<float>(0.0);
-	static float prevDist = static_cast<float>(0.0);
+	const static float DEPTH_THRESHOLD = static_cast<float>(0.45);
+	//permanent variable
 	static GestureAlgos::TouchType out = GestureAlgos::TouchType::NONE;
 
-	//process depth information
-	filterDiff(depth, prevDepth);//differentiator (high pass filter)
-	if (qAbs(depth) > DIFF_DEPTH_THRESHOLD)
-	{
-		int sign = static_cast<int>((depth)/qAbs(depth));
-		if (0 == varSign)
-		{
-			//variation detected
-			varSign = sign;
-		}
-		else if (varSign != sign)
-		{
-			//sign change detected
-			varSign = -varSign;
-		}
+	//make sure that the previous touch up is send only once
+	if ((GestureAlgos::TouchType::DOUBLE_UP == out) ||
+		(GestureAlgos::TouchType::SINGLE_UP == out)) {
+			out = GestureAlgos::TouchType::NONE;
+			return out;
 	}
 
-	//process distance between fingers (thumb and index information)
-	//Kalman filtering might be done by the client
-	float dist = std::sqrtf(std::pow(ptThumb.x()-ptIndex.x(), static_cast<float>(2.0))+
-		std::pow(ptThumb.y()-ptIndex.y(), static_cast<float>(2.0)));
-	filterDiff(dist, prevDist);
-
-	//virtual touch screen
-	if (-1 == varSign) {
+	//process depth information
+	if ((DEPTH_THRESHOLD >= depthThumb) || (DEPTH_THRESHOLD >= depthIndex)) {
 		//touch down
-		if (GestureAlgos::TouchType::NONE == out) {
-			out = (qAbs(dist) > DIFF_DIST_THRESHOLD)?GestureAlgos::TouchType::DOUBLE_DOWN:GestureAlgos::TouchType::SINGLE_DOWN;
-		}
-	} else if (1 == varSign) {
+		out = ((DEPTH_THRESHOLD >= depthThumb) && (DEPTH_THRESHOLD >= depthIndex))?
+			GestureAlgos::TouchType::DOUBLE_DOWN:GestureAlgos::TouchType::SINGLE_DOWN;
+	} else {
 		//touch up
 		if (GestureAlgos::TouchType::DOUBLE_DOWN == out) {
 			out = GestureAlgos::TouchType::DOUBLE_UP;
 		} else if (GestureAlgos::TouchType::SINGLE_DOWN == out) {
 			out = GestureAlgos::TouchType::SINGLE_UP;
 		}
-		varSign = 0;
-	} else {
-		out = GestureAlgos::TouchType::NONE;
 	}
 
 	return out;

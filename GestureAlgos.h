@@ -37,12 +37,10 @@ public:
 	//filters
 	int filterKalman(QPoint &pt);
 	void filterLowPass(float &depth);
-	template<typename T>
-	void filterDiff(T &depth, T &diffState);
 	//detect when the hand touches the virtual touch screen
 	//the OS decides which gesture has been made
 	enum TouchType {NONE = 0, SINGLE_DOWN, SINGLE_UP, DOUBLE_DOWN, DOUBLE_UP};
-	TouchType isTouch(const QPoint &ptThumb, const QPoint &ptIndex, float depth);
+	TouchType isTouch(float depthThumb, float depthIndex);
 private:
 	int initKalman();
 	struct BiquadState {

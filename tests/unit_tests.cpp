@@ -9,7 +9,6 @@ class TestGestureAlgos: public QObject
 private slots:
     void imageToScreenFilterKalman();
 	void filterLowPass();
-	void filterDiff();
 	void isTouch();
 private:
 	int getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
@@ -65,22 +64,6 @@ void TestGestureAlgos::filterLowPass()
 		sum += abs(val*val);
 	}
 	QVERIFY(fabs(1.58709 - sum) < TOL);
-}
-
-void TestGestureAlgos::filterDiff()
-{
-	GestureAlgos *algos = GestureAlgos::instance();
-	QVERIFY(NULL != algos);
-
-	float s = static_cast<float>(0);
-	float diffState = static_cast<float>(0);
-	algos->filterDiff(s, diffState);
-	QVERIFY(0 == s);
-	s = static_cast<float>(1.0);
-	algos->filterDiff(s, diffState);
-	QVERIFY(1.0 == s);
-	algos->filterDiff(s, diffState);
-	QVERIFY(0 == s);
 }
 
 int TestGestureAlgos::getData(QVector<int> &x, QVector<int> &y, QVector<float> &depth, 
