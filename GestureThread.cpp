@@ -132,17 +132,17 @@ void GestureThread::run()
 				for (i = 0; i < VirtualTouchScreen::POINTS; ++i) {
 					mainWnd->handSkeletonPoints_[i] = QPointF(fingerNode[i].positionImage.x, fingerNode[i].positionImage.y);
 					mainWnd->gestureAlgos->imageToScreen(mainWnd->handSkeletonPoints_[i]);
-					depth[i] = static_cast<qreal>(fingerNode[i].positionWorld.y);
-					//TODO: low pass filter depth
+					depth[i] = static_cast<qreal>(fingerNode[i].positionWorld.y);					
 				}
 				mainWnd->gestureAlgos->filterKalman(
 					mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB],
 					mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX]);
 				mainWnd->skeletonPointMutex_.unlock();
+				//TODO: low pass filter depth
 
-				//request index position update
+				//request finger position update
 				emit moveIndex();
-				//TODO: request thumb update
+				emit moveThumb();
 
 				//detect touch gesture				
 				switch (mainWnd->gestureAlgos->isTouch(depth[VirtualTouchScreen::THUMB], 

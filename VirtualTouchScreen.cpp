@@ -19,11 +19,17 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	gestureThread(NULL),
 	offset(OFFSET_X,OFFSET_Y),
 	scaleFactor(SCALE_FACTOR_x100/100.0),
+	thumbPointer(new QWidget()),
 	config(NULL),
 	handSkeletonPoints_(Hand::POINTS),
 	touch_(new TouchInputEmulator())
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+	//load finger icons
+	setFingerPointer(this, ":/icons/index_finger.jpg");
+	setFingerPointer(thumbPointer, ":/icons/thumb_finger.jpg");
+	thumbPointer->show();
 
 	loadSettings();
 
@@ -44,26 +50,6 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	gestureThread = new GestureThread(this);
 	connect(gestureThread, SIGNAL(moveThumb()), this, SLOT(update()));
 	gestureThread->start();
-
-	//load index icon
-	QString path = ":/icons/index_finger.jpg";
-	int size = -1;
-	QPixmap pix(path);
-	if ((size != pix.size().width()) && (0 < size))
-	{
-		pix = pix.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-	}
-	if (!pix.isNull()) {
-		QPalette p = palette();
-		p.setBrush(QPalette::Background, pix);
-		setPalette(p);
-		QSize size = pix.size();
-		resize(pix.size());
-		setMask(pix.mask());
-	}
-	else {
-		qDebug() << "Cannot load cursor pixmap";
-	}
 }
 
 VirtualTouchScreen::~VirtualTouchScreen()
@@ -72,8 +58,29 @@ VirtualTouchScreen::~VirtualTouchScreen()
 	gestureThread->wait();
 	delete gestureThread;
 	delete touch_;
+	delete thumbPointer;
 	delete config;
 	saveSettings();
+}
+
+void VirtualTouchScreen::setFingerPointer(QWidget *target, 
+										  const QString &iconPath, int iconSize)
+{
+	QPixmap pix(iconPath);
+	if ((iconSize != pix.size().width()) && (0 < iconSize))
+	{
+		pix = pix.scaled(iconSize, iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+	if (!pix.isNull()) {
+		QPalette p = palette();
+		p.setBrush(QPalette::Background, pix);
+		target->setPalette(p);
+		target->resize(pix.size());
+		target->setMask(pix.mask());
+	}
+	else {
+		qDebug() << "Cannot load cursor pixmap";
+	}
 }
 
 void VirtualTouchScreen::setupActions()
@@ -153,6 +160,13 @@ void VirtualTouchScreen::onMoveIndex()
 
 void VirtualTouchScreen::onMoveThumb()
 {
+	if (NULL == thumbPointer) {
+		return;
+	}
+	QMutexLocker lock(&skeletonPointMutex_);
+	const QSize &size = thumbPointer->size();
+	thumbPointer->move(handSkeletonPoints_[THUMB].x()-size.width()/2, 
+		handSkeletonPoints_[THUMB].y()-size.height()/2);
 }
 
 void VirtualTouchScreen::onSwipe(BYTE code)

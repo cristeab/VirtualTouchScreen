@@ -38,6 +38,7 @@ public slots:
 	void onTouchUp(const QPoint &ptIndex);
 
 private:
+	void setFingerPointer(QWidget *target, const QString &iconPath, int iconSize = -1);
 	void setupActions();
 	void loadSettings();
 	void saveSettings();
@@ -46,6 +47,7 @@ private:
 	QString pointerIconPath;
 	QPoint offset;
 	float scaleFactor;
+	QWidget *thumbPointer;
 	ConfigDialog *config;
 	QVector<QPointF> handSkeletonPoints_;
 	QMutex skeletonPointMutex_;
