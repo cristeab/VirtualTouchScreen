@@ -197,26 +197,29 @@ void GestureThread::run()
 				depthThumb = static_cast<float>(fingerNode[0].positionWorld.y);
 				depthIndex = static_cast<float>(fingerNode[1].positionWorld.y);
 				//TODO: low pass filter both depths
+				//convert thumb and index positions to desktop coordinates
+				QPointF ptThumb(fingerNode[0].positionImage.x, fingerNode[0].positionImage.y);
+				mainWnd->gestureAlgos->imageToScreen(ptThumb);
+				QPointF ptIndex(fingerNode[1].positionImage.x, fingerNode[1].positionImage.y);
+				mainWnd->gestureAlgos->imageToScreen(ptIndex);
 				switch (mainWnd->gestureAlgos->isTouch(depthThumb, depthIndex))
 				{
 				case GestureAlgos::TouchType::DOUBLE_DOWN:
 					qDebug() << "double touch down";
-					emit touchDown(mainWnd->handSkeletonPoints_[0].toPoint(), 
-						mainWnd->handSkeletonPoints_[1].toPoint());
+					emit touchDown(ptThumb.toPoint(), ptIndex.toPoint());
 					break;
 				case GestureAlgos::TouchType::SINGLE_DOWN:
 					qDebug() << "single touch down";
-					emit touchDown(mainWnd->handSkeletonPoints_[1].toPoint());
+					emit touchDown(ptIndex.toPoint());
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
 					qDebug() << "double touch up";
-					emit touchUp(mainWnd->handSkeletonPoints_[0].toPoint(), 
-						mainWnd->handSkeletonPoints_[1].toPoint());
+					emit touchUp(ptThumb.toPoint(), ptIndex.toPoint());
 					//emit tap(handPos);
 					break;
 				case GestureAlgos::TouchType::SINGLE_UP:
 					qDebug() << "single touch up";
-					emit touchUp(mainWnd->handSkeletonPoints_[1].toPoint());
+					emit touchUp(ptIndex.toPoint());
 					break;
 				default:
 					(void)0;
