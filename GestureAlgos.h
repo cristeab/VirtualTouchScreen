@@ -35,7 +35,7 @@ public:
 	//at the fixed position (imgW/2, imgH/2)
 	int toHandCenter(QPointF &pt, const QPointF &handPos);
 	//filters
-	int filterKalman(QPointF &pt);
+	int filterKalman(QPointF &ptThumb, QPointF &ptIndex);
 	void filterLowPass(qreal &depth);
 	//detect when the hand touches the virtual touch screen
 	//the OS decides which gesture has been made

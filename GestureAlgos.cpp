@@ -6,8 +6,8 @@ GestureAlgos::GestureAlgos() :
 	screen_(0, 0),
 	image_(0,0),
 	scaleFactor_(0.0), offset_(0,0),
-	KF_(cv::KalmanFilter(4, 2, 0)),
-	measurement_(cv::Mat_<float>(2,1))
+	KF_(cv::KalmanFilter(8, 4, 0)),
+	measurement_(cv::Mat_<float>(4,1))
 {
 }
 
@@ -20,9 +20,20 @@ int GestureAlgos::initKalman()
 	measurement_.setTo(cv::Scalar(0));
 	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;
 	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;
-	KF_.statePre.at<float>(2) = 0;
-	KF_.statePre.at<float>(3) = 0;
-	KF_.transitionMatrix = *(cv::Mat_<float>(4, 4) << 1,0,0,0,   0,1,0,0,  0,0,1,0,  0,0,0,1);
+	KF_.statePre.at<float>(2) = static_cast<float>(screen_.width())/2.0;
+	KF_.statePre.at<float>(3) = static_cast<float>(screen_.height())/2.0;
+	for (int i = 0; i < 4; ++i) {
+		KF_.statePre.at<float>(4+i) = 0;
+	}
+	KF_.transitionMatrix = *(cv::Mat_<float>(8, 8) << 
+		1,0,0,0,0,0,0,0,   
+		0,1,0,0,0,0,0,0,  
+		0,0,1,0,0,0,0,0,  
+		0,0,0,1,0,0,0,0,
+		0,0,0,0,1,0,0,0,
+		0,0,0,0,0,1,0,0,
+		0,0,0,0,0,0,1,0,
+		0,0,0,0,0,0,0,1);
 	setIdentity(KF_.measurementMatrix);
 	setIdentity(KF_.processNoiseCov, cv::Scalar::all(1e-4));
 	setIdentity(KF_.measurementNoiseCov, cv::Scalar::all(1e-1));
@@ -86,7 +97,7 @@ int GestureAlgos::toHandCenter(QPointF &pt, const QPointF &handPos)
 	return EXIT_SUCCESS;
 }
 
-int GestureAlgos::filterKalman(QPointF &pt)
+int GestureAlgos::filterKalman(QPointF &ptThumb, QPointF &ptIndex)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -97,13 +108,19 @@ int GestureAlgos::filterKalman(QPointF &pt)
 	}
 
 	KF_.predict();
-	measurement_(0) = static_cast<float>(pt.x());
-	measurement_(1) = static_cast<float>(pt.y());
+	measurement_(0) = static_cast<float>(ptThumb.x());
+	measurement_(1) = static_cast<float>(ptThumb.y());
+	measurement_(2) = static_cast<float>(ptIndex.x());
+	measurement_(3) = static_cast<float>(ptIndex.y());
 	cv::Mat estimated = KF_.correct(measurement_);
 	qreal tmp = estimated.at<float>(0);
-	pt.setX(tmp);
+	ptThumb.setX(tmp);
 	tmp = estimated.at<float>(1);
-	pt.setY(tmp);
+	ptThumb.setY(tmp);
+	tmp = estimated.at<float>(2);
+	ptIndex.setX(tmp);
+	tmp = estimated.at<float>(3);
+	ptIndex.setY(tmp);
 
 	return EXIT_SUCCESS;
 }

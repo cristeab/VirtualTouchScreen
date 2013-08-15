@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/splash.jpg</file>
+        <file>icons/index_finger.jpg</file>
+        <file>icons/thumb_finger.jpg</file>
     </qresource>
 </RCC>

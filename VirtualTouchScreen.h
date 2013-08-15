@@ -24,11 +24,12 @@ public:
 	~VirtualTouchScreen();
 	enum {OFFSET_X = 200, OFFSET_Y = 100, 
 		SCALE_FACTOR_x100 = 100};
-	enum Hand {THUMB = 0, INDEX, MIDDLE, RING, PINKY, CENTER, ELBOW, POINTS};
+	enum Hand {THUMB = 0, INDEX, POINTS};
 public slots:
 	void showMenu();
 	void showHelp();
-	void onMoveHand(const QPoint pt);
+	void onMoveIndex();
+	void onMoveThumb();
 	void onSwipe(BYTE code);
 	//touch screen slots
 	void onTouchDown(const QPoint &ptThumb, const QPoint &ptIndex);
@@ -36,14 +37,10 @@ public slots:
 	void onTouchUp(const QPoint &ptThumb, const QPoint &ptIndex);
 	void onTouchUp(const QPoint &ptIndex);
 
-protected:
-	void paintEvent(QPaintEvent*);
-
 private:
 	void setupActions();
 	void loadSettings();
 	void saveSettings();
-	void drawLine(QPainter& p, int p1, int p2);
 	GestureThread *gestureThread;
 	GestureAlgos *gestureAlgos;
 	QString pointerIconPath;

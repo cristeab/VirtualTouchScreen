@@ -58,7 +58,8 @@ GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(),
 	mainWnd(obj)
 {
 	setupPipeline();
-	connect(this, SIGNAL(moveHand(const QPoint)), mainWnd, SLOT(onMoveHand(const QPoint)));
+	connect(this, SIGNAL(moveIndex()), mainWnd, SLOT(onMoveIndex()));
+	connect(this, SIGNAL(moveThumb()), mainWnd, SLOT(onMoveThumb()));
 	//link touch signals with the corresponding slots in the main window
 	connect(this, SIGNAL(touchDown(const QPoint&, const QPoint&)), mainWnd, 
 		SLOT(onTouchDown(const QPoint&, const QPoint&)));
@@ -86,52 +87,25 @@ void GestureThread::run()
 
 			//hand position
 			PXCGesture::GeoNode handNode;
-			QPointF refHandPos;			
-			qreal depthThumb = 0;
-			qreal depthIndex = 0;
 			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
-				qDebug() << "center: x = " << handNode.positionImage.x << 
-						", y = " << handNode.positionImage.y;
-
-				refHandPos.setX(handNode.positionImage.x);
-				refHandPos.setY(handNode.positionImage.y);				
-
-				//convert to screen coordinates
-				QPointF handPos = refHandPos;//TODO: remove this
-				mainWnd->gestureAlgos->imageToScreen(handPos);
-
-				//filter hand coordinates (center only for now)
-				if (EXIT_FAILURE == mainWnd->gestureAlgos->filterKalman(handPos)) {
-					qDebug() << "error in Kalman filter";
-				}
-
-				//filter depth information: low pass filtering in order to remove high frequency components
-				//mainWnd->gestureAlgos->filterLowPass(depth);
-
-				qDebug() << QThread::currentThreadId() << "(x,y,d) = (" << 
-					handNode.positionImage.x << "," << handNode.positionImage.y
-					<< "," << handNode.positionWorld.y << ")";
-
-				//move cursor to the new position
-				emit moveHand(handPos.toPoint());//TODO: no window movement
 				//check hand status
 				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {
+					//TODO: use this to show/hide finger markers
 					qDebug() << "hand open";
 				} else if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_CLOSE) {
 					qDebug() << "hand closed";
 				}
-			} else {
-				updateHand = false;
 			}
 
 			//finger position
-			PXCGesture::GeoNode fingerNode[5];
-			if ( gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY |
-				PXCGesture::GeoNode::LABEL_FINGER_THUMB, 
-				5, fingerNode) != PXC_STATUS_ITEM_UNAVAILABLE) {
-					for (int i = 0; i < 5; ++i) {
+			PXCGesture::GeoNode fingerNode[VirtualTouchScreen::POINTS];
+			int i = 0;
+			if ( gesture->QueryNodeData(0, 
+				PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY | PXCGesture::GeoNode::LABEL_FINGER_THUMB, 
+				VirtualTouchScreen::POINTS, fingerNode) != PXC_STATUS_ITEM_UNAVAILABLE) {
+					for (i = 0; i < VirtualTouchScreen::POINTS; ++i) {
 						switch (fingerNode[i].body & PXCGesture::GeoNode::LABEL_MASK_DETAILS) {
 						case PXCGesture::GeoNode::LABEL_FINGER_THUMB:
 							qDebug() << "thumb: x = " << fingerNode[i].positionImage.x << 
@@ -143,21 +117,6 @@ void GestureThread::run()
 								", y = " << fingerNode[i].positionImage.y <<
 								", depth = " << fingerNode[i].positionWorld.y;
 							break;
-						case PXCGesture::GeoNode::LABEL_FINGER_MIDDLE:
-							qDebug() << "middle: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y <<
-								", depth = " << fingerNode[i].positionWorld.y;
-							break;
-						case PXCGesture::GeoNode::LABEL_FINGER_RING:
-							qDebug() << "ring: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y <<
-								", depth = " << fingerNode[i].positionWorld.y;
-							break;
-						case PXCGesture::GeoNode::LABEL_FINGER_PINKY:
-							qDebug() << "pinky: x = " << fingerNode[i].positionImage.x << 
-								", y = " << fingerNode[i].positionImage.y <<
-								", depth = " << fingerNode[i].positionWorld.y;
-							break;
 						default:
 							updateHand = false;
 						}
@@ -166,60 +125,47 @@ void GestureThread::run()
 				updateHand = false;
 			}
 
-			//elbow position
-			PXCGesture::GeoNode elbowNode;
-			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_ELBOW_PRIMARY,
-				&elbowNode) != PXC_STATUS_ITEM_UNAVAILABLE) {
-					qDebug() << "elbow: x = " << elbowNode.positionImage.x << 
-						", y = " << elbowNode.positionImage.y;
-			} else {
-				updateHand = false;
-			}
-
 			if (updateHand) {
 				//fingers
-				int i = 0;
 				mainWnd->skeletonPointMutex_.lock();
-				for (; i < 5; ++i) {
-					mainWnd->handSkeletonPoints_[i] = QPoint(fingerNode[i].positionImage.x, fingerNode[i].positionImage.y);
-					mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], refHandPos);
+				qreal depth[VirtualTouchScreen::POINTS];
+				for (i = 0; i < VirtualTouchScreen::POINTS; ++i) {
+					mainWnd->handSkeletonPoints_[i] = QPointF(fingerNode[i].positionImage.x, fingerNode[i].positionImage.y);
+					mainWnd->gestureAlgos->imageToScreen(mainWnd->handSkeletonPoints_[i]);
+					depth[i] = static_cast<qreal>(fingerNode[i].positionWorld.y);
+					//TODO: low pass filter depth
 				}
-				//hand center
-				mainWnd->handSkeletonPoints_[i++] = mainWnd->gestureAlgos->imageCenter();
-				//elbow
-				mainWnd->handSkeletonPoints_[i] = QPoint(elbowNode.positionImage.x, elbowNode.positionImage.y);
-				mainWnd->gestureAlgos->toHandCenter(mainWnd->handSkeletonPoints_[i], refHandPos);
+				mainWnd->gestureAlgos->filterKalman(
+					mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB],
+					mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX]);
 				mainWnd->skeletonPointMutex_.unlock();
-				//request hand skeleton redraw
-				emit updateHandSkeleton();
 
-				//detect touch gesture
-				depthThumb = static_cast<float>(fingerNode[0].positionWorld.y);
-				depthIndex = static_cast<float>(fingerNode[1].positionWorld.y);
-				//TODO: low pass filter both depths
-				//convert thumb and index positions to desktop coordinates
-				QPointF ptThumb(fingerNode[0].positionImage.x, fingerNode[0].positionImage.y);
-				mainWnd->gestureAlgos->imageToScreen(ptThumb);
-				QPointF ptIndex(fingerNode[1].positionImage.x, fingerNode[1].positionImage.y);
-				mainWnd->gestureAlgos->imageToScreen(ptIndex);
-				switch (mainWnd->gestureAlgos->isTouch(depthThumb, depthIndex))
+				//request index position update
+				emit moveIndex();
+				//TODO: request thumb update
+
+				//detect touch gesture				
+				switch (mainWnd->gestureAlgos->isTouch(depth[VirtualTouchScreen::THUMB], 
+					depth[VirtualTouchScreen::INDEX]))
 				{
 				case GestureAlgos::TouchType::DOUBLE_DOWN:
 					qDebug() << "double touch down";
-					emit touchDown(ptThumb.toPoint(), ptIndex.toPoint());
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
+						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::SINGLE_DOWN:
 					qDebug() << "single touch down";
-					emit touchDown(ptIndex.toPoint());
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
 					qDebug() << "double touch up";
-					emit touchUp(ptThumb.toPoint(), ptIndex.toPoint());
+					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
+						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					//emit tap(handPos);
 					break;
 				case GestureAlgos::TouchType::SINGLE_UP:
 					qDebug() << "single touch up";
-					emit touchUp(ptIndex.toPoint());
+					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				default:
 					(void)0;

@@ -31,7 +31,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	QDesktopWidget *desktop = QApplication::desktop();
 	QRect geom = desktop->availableGeometry(0);//first screen
 
-	//init gesture algosithms
+	//init gesture algorithms
 	gestureAlgos = GestureAlgos::instance();
 	gestureAlgos->setScreenSize(QSize(geom.width(), geom.height()));
 	gestureAlgos->setCorrectionFactors(scaleFactor, offset);
@@ -42,10 +42,28 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
 	gestureThread = new GestureThread(this);
-	connect(gestureThread, SIGNAL(updateHandSkeleton()), this, SLOT(update()));
+	connect(gestureThread, SIGNAL(moveThumb()), this, SLOT(update()));
 	gestureThread->start();
 
-	resize(gestureAlgos->imageSize());//TODO: should use a different approach
+	//load index icon
+	QString path = ":/icons/index_finger.jpg";
+	int size = -1;
+	QPixmap pix(path);
+	if ((size != pix.size().width()) && (0 < size))
+	{
+		pix = pix.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+	if (!pix.isNull()) {
+		QPalette p = palette();
+		p.setBrush(QPalette::Background, pix);
+		setPalette(p);
+		QSize size = pix.size();
+		resize(pix.size());
+		setMask(pix.mask());
+	}
+	else {
+		qDebug() << "Cannot load cursor pixmap";
+	}
 }
 
 VirtualTouchScreen::~VirtualTouchScreen()
@@ -125,9 +143,16 @@ void VirtualTouchScreen::showHelp()
 		"the application icon on the main toolbar or click the pointer.");
 }
 
-void VirtualTouchScreen::onMoveHand(const QPoint pt)
+void VirtualTouchScreen::onMoveIndex()
 {
-	move(pt.x(), pt.y());
+	QMutexLocker lock(&skeletonPointMutex_);
+	const QSize &size = this->size();
+	move(handSkeletonPoints_[INDEX].x()-size.width()/2, 
+		handSkeletonPoints_[INDEX].y()-size.height()/2);
+}
+
+void VirtualTouchScreen::onMoveThumb()
+{
 }
 
 void VirtualTouchScreen::onSwipe(BYTE code)
@@ -190,42 +215,4 @@ void VirtualTouchScreen::saveSettings()
 	settings.setValue(KEY_OFFSET_X, offset.x());
 	settings.setValue(KEY_OFFSET_Y, offset.y());
 	settings.setValue(SCALE_FACTOR, scaleFactor);
-}
-
-void VirtualTouchScreen::paintEvent(QPaintEvent*)
-{
-	QPixmap pix(gestureAlgos->imageSize());
-	pix.fill(Qt::transparent);
-
-	QPainter p(&pix);
-	QPen pen;
-	pen.setColor(QColor(255,0,0,255));
-	pen.setWidth(5);
-	p.setPen(pen);
-
-	// Draw Hand Skeleton
-	//TODO: data synchronization needed
-	//TODO: the center of the hand should be always displayed
-	skeletonPointMutex_.lock();
-	drawLine(p, Hand::ELBOW,  Hand::CENTER);
-	drawLine(p, Hand::CENTER, Hand::THUMB);
-	drawLine(p, Hand::CENTER, Hand::INDEX);
-	drawLine(p, Hand::CENTER, Hand::MIDDLE);
-	drawLine(p, Hand::CENTER, Hand::RING);
-	drawLine(p, Hand::CENTER, Hand::PINKY);
-	skeletonPointMutex_.unlock();
-
-	//set image on the window
-	if (!pix.isNull()) {
-		QPalette p = palette();
-		p.setBrush(QPalette::Background, pix);
-		setPalette(p);
-		setMask(pix.mask());
-	}
-}
-
-void VirtualTouchScreen::drawLine(QPainter& p, int p1, int p2)
-{
-	p.drawLine(handSkeletonPoints_[p1].x(), handSkeletonPoints_[p1].y(),
-		handSkeletonPoints_[p2].x(), handSkeletonPoints_[p2].y());
 }

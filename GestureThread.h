@@ -16,8 +16,8 @@ public:
 protected:
 	void run();
 signals:
-	void moveHand(const QPoint pt);
-	void updateHandSkeleton();
+	void moveIndex();
+	void moveThumb();
 	//touch signals
 	void touchDown(const QPoint &ptThumb, const QPoint &ptIndex);
 	void touchDown(const QPoint &ptIndex);
