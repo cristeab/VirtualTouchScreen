@@ -28,8 +28,8 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 	//load finger icons
-	setFingerPointer(this, ":/icons/index_finger.jpg");
-	setFingerPointer(thumbPointer, ":/icons/thumb_finger.jpg");
+	setFingerPointer(this, ":/icons/fingerprint.png", 64);
+	setFingerPointer(thumbPointer, ":/icons/fingerprint.png", 64);
 	thumbPointer->show();
 
 	loadSettings();
