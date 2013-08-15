@@ -1,13 +1,15 @@
 #include <qglobal.h>
 #include <QDebug>
 #include "GestureAlgos.h"
+#include "VirtualTouchScreen.h"
 
 GestureAlgos::GestureAlgos() :
 	screen_(0, 0),
 	image_(0,0),
 	scaleFactor_(0.0), offset_(0,0),
 	KF_(cv::KalmanFilter(8, 4, 0)),
-	measurement_(cv::Mat_<float>(4,1))
+	measurement_(cv::Mat_<float>(4,1)),
+	mainWnd_(NULL)
 {
 }
 
@@ -124,10 +126,12 @@ void GestureAlgos::initBiquad()
     sos_mat_[4][0] = 1.0, sos_mat_[4][1] = 2.0, sos_mat_[4][2] = 1.0, sos_mat_[4][3] = 1.0,
 		sos_mat_[4][4] = 0.5304, sos_mat_[4][5] = 0.7165;
 	gain_ = 0.0189;
-	for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
-		biquadState[n].index = n;
-		memset(biquadState[n].mem_in, 0, sizeof(biquadState[n].mem_in));
-		memset(biquadState[n].mem_out, 0, sizeof(biquadState[n].mem_out));
+	for (int i = 0; i < 2; ++i) {
+		for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
+			biquadState[i][n].index = n;
+			memset(biquadState[i][n].mem_in, 0, sizeof(biquadState[i][n].mem_in));
+			memset(biquadState[i][n].mem_out, 0, sizeof(biquadState[i][n].mem_out));
+		}
 	}
 }
 
@@ -148,7 +152,7 @@ double GestureAlgos::biquad(BiquadState *state, double in)
 	return out;
 }
 
-void GestureAlgos::filterLowPass(qreal &depth)
+void GestureAlgos::filterLowPass(qreal &depthThumb, qreal &depthIndex)
 {
 	static bool initDone = false;
 	if (!initDone) {
@@ -157,15 +161,15 @@ void GestureAlgos::filterLowPass(qreal &depth)
 	}
 	//cascade of biquads
 	for (int n = 0; n < SosMat::NB_BIQUADS; ++n) {
-		depth = biquad(biquadState+n, depth);
+		depthThumb = biquad(&(biquadState[0][n]), depthThumb);
+		depthIndex = biquad(&(biquadState[1][n]), depthIndex);
 	}
-	depth = gain_*depth;
+	depthThumb = gain_*depthThumb;
+	depthIndex = gain_*depthIndex;
 }
 
 GestureAlgos::TouchType GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex)
 {
-	//constants
-	const static qreal DEPTH_THRESHOLD = 0.45;
 	//permanent variable
 	static GestureAlgos::TouchType out = GestureAlgos::TouchType::NONE;
 
@@ -177,9 +181,11 @@ GestureAlgos::TouchType GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex
 	}
 
 	//process depth information
-	if ((DEPTH_THRESHOLD >= depthThumb) || (DEPTH_THRESHOLD >= depthIndex)) {
+	if ((mainWnd_->virtualScreenThreshold_ >= depthThumb) || 
+		(mainWnd_->virtualScreenThreshold_ >= depthIndex)) {
 		//touch down
-		out = ((DEPTH_THRESHOLD >= depthThumb) && (DEPTH_THRESHOLD >= depthIndex))?
+		out = ((mainWnd_->virtualScreenThreshold_ >= depthThumb) && 
+			(mainWnd_->virtualScreenThreshold_ >= depthIndex))?
 			GestureAlgos::TouchType::DOUBLE_DOWN:GestureAlgos::TouchType::SINGLE_DOWN;
 	} else {
 		//touch up

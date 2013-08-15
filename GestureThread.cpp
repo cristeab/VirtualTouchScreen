@@ -134,11 +134,13 @@ void GestureThread::run()
 					mainWnd->gestureAlgos->imageToScreen(mainWnd->handSkeletonPoints_[i]);
 					depth[i] = static_cast<qreal>(fingerNode[i].positionWorld.y);					
 				}
+				//Kalman filter for coordinates
 				mainWnd->gestureAlgos->filterKalman(
 					mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB],
 					mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX]);
 				mainWnd->skeletonPointMutex_.unlock();
-				//TODO: low pass filter depth
+				//low pass filter for the depth
+				mainWnd->gestureAlgos->filterLowPass(depth[0], depth[1]);
 
 				//request finger position update
 				emit moveIndex();

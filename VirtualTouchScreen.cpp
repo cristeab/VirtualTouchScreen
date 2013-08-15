@@ -22,7 +22,8 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	thumbPointer(new QWidget()),
 	config(NULL),
 	handSkeletonPoints_(Hand::POINTS),
-	touch_(new TouchInputEmulator())
+	touch_(new TouchInputEmulator()),
+	virtualScreenThreshold_(0.35)
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
@@ -41,6 +42,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	gestureAlgos = GestureAlgos::instance();
 	gestureAlgos->setScreenSize(QSize(geom.width(), geom.height()));
 	gestureAlgos->setCorrectionFactors(scaleFactor, offset);
+	gestureAlgos->setMainWindow(this);
 
 	//config = new ConfigDialog(NULL, this);//screen size must be set
 

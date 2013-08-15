@@ -19,6 +19,7 @@ class VirtualTouchScreen : public QMainWindow
 	Q_OBJECT
 	friend class GestureThread;
 	friend class ConfigDialog;
+	friend class GestureAlgos;
 public:
 	explicit VirtualTouchScreen(QWidget *parent = 0);
 	~VirtualTouchScreen();
@@ -52,6 +53,7 @@ private:
 	QVector<QPointF> handSkeletonPoints_;
 	QMutex skeletonPointMutex_;
 	TouchInputEmulator *touch_;
+	qreal virtualScreenThreshold_;
 };
 
 #endif // VirtualTouchScreen_H

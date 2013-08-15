@@ -17,24 +17,24 @@ private:
 
 void TestGestureAlgos::imageToScreenFilterKalman()
 {
-	/*GestureAlgos *algos = GestureAlgos::instance();
+	GestureAlgos *algos = GestureAlgos::instance();
 	QVERIFY(NULL != algos);
 	QPointF pt(0, 0);
-	QVERIFY(EXIT_FAILURE == algos->filterKalman(pt));
+	QVERIFY(EXIT_FAILURE == algos->filterKalman(pt, pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setScreenSize(QSize(1024, 768));
-	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt, pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setImageSize(QSize(320, 240));
-	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt, pt));
 	QVERIFY(EXIT_FAILURE == algos->imageToScreen(pt));
 	algos->setCorrectionFactors(1.0, QPoint(0, 0));
-	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt));
+	QVERIFY(EXIT_SUCCESS == algos->filterKalman(pt, pt));
 	pt.setX(0);
 	pt.setY(0);
 	QVERIFY(EXIT_SUCCESS == algos->imageToScreen(pt));
 	QVERIFY(1024.0 == pt.x());
-	QVERIFY(0.0 == pt.y());*/
+	QVERIFY(0.0 == pt.y());
 }
 
 void TestGestureAlgos::filterLowPass()
@@ -46,24 +46,28 @@ void TestGestureAlgos::filterLowPass()
 	const static qreal PI = 3.1415926535;
 	const static qreal TOL = 1e-3;
 	int nbSamp = static_cast<int>(10/fn);
-	qreal val = 0;
-	qreal sum = 0;
+	qreal val[] = {0,0};
+	qreal sum[] = {0,0};
 	for (int n = 0; n < nbSamp; ++n) {
-		val = sin(2*PI*fn*n);
-		algos->filterLowPass(val);
-		sum += abs(val*val);
+		val[0] = val[1] = sin(2*PI*fn*n);
+		algos->filterLowPass(val[0], val[1]);
+		sum[0] += abs(val[0]*val[0]);
+		sum[1] += abs(val[1]*val[1]);
 	}
-	QVERIFY(fabs(48.5314 - sum) < TOL);
+	QVERIFY(fabs(48.5314 - sum[0]) < TOL);
+	QVERIFY(fabs(48.5314 - sum[1]) < TOL);
 
 	fn = 0.4;
 	nbSamp = static_cast<int>(10/fn);
-	sum = 0;
+	sum[0] = sum[1] = 0;
 	for (int n = 0; n < nbSamp; ++n) {
-		val = sin(2*PI*fn*n);
-		algos->filterLowPass(val);
-		sum += abs(val*val);
+		val[0] = val[1] = sin(2*PI*fn*n);
+		algos->filterLowPass(val[0], val[1]);
+		sum[0] += abs(val[0]*val[0]);
+		sum[1] += abs(val[1]*val[1]);
 	}
-	QVERIFY(fabs(1.58709 - sum) < TOL);
+	QVERIFY(fabs(1.58709 - sum[0]) < TOL);
+	QVERIFY(fabs(1.58709 - sum[1]) < TOL);
 }
 
 int TestGestureAlgos::getData(QVector<int> &x, QVector<int> &y, QVector<qreal> &depth, 
