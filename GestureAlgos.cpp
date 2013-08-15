@@ -18,14 +18,16 @@ int GestureAlgos::initKalman()
 	}
 	//setup Kalman filter
 	measurement_.setTo(cv::Scalar(0));
-	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;
-	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;
-	KF_.statePre.at<float>(2) = static_cast<float>(screen_.width())/2.0;
-	KF_.statePre.at<float>(3) = static_cast<float>(screen_.height())/2.0;
-	for (int i = 0; i < 4; ++i) {
-		KF_.statePre.at<float>(4+i) = 0;
-	}
+	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;//x0
+	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;//y0
+	KF_.statePre.at<float>(2) = 0;//dx0
+	KF_.statePre.at<float>(3) = 0;//dy0
+	KF_.statePre.at<float>(4) = static_cast<float>(screen_.width())/2.0;//x1
+	KF_.statePre.at<float>(5) = static_cast<float>(screen_.height())/2.0;//y1
+	KF_.statePre.at<float>(6) = 0;//dx1
+	KF_.statePre.at<float>(7) = 0;//dy1
 	KF_.transitionMatrix = *(cv::Mat_<float>(8, 8) << 
+	//  x0,y0,dx0,dy0,x1,y2,dx1,dy1,
 		1,0,0,0,0,0,0,0,   
 		0,1,0,0,0,0,0,0,  
 		0,0,1,0,0,0,0,0,  
@@ -79,22 +81,6 @@ int GestureAlgos::imageToScreen(QPointF &pt)
 	pt.setY(y);
 
 	return rc;
-}
-
-int GestureAlgos::toHandCenter(QPointF &pt, const QPointF &handPos)
-{
-	if ((0 >= image_.width()) || (0 >= image_.height())) {
-		qDebug() << "either image width or image height is not initialized";
-		return EXIT_FAILURE;
-	}
-
-	qreal x = image_.width()/2.0+pt.x()-handPos.x();
-	pt.setY(image_.height()/2.0+pt.y()-handPos.y());
-
-	//invert X axis
-	pt.setX(image_.width()-x);
-
-	return EXIT_SUCCESS;
 }
 
 int GestureAlgos::filterKalman(QPointF &ptThumb, QPointF &ptIndex)

@@ -31,9 +31,6 @@ public:
 	}
 	//transforms to screen coordinates
 	int imageToScreen(QPointF &pt);
-	//transforms absolute finger coordinates to coordinates relative to the center of the hand which is 
-	//at the fixed position (imgW/2, imgH/2)
-	int toHandCenter(QPointF &pt, const QPointF &handPos);
 	//filters
 	int filterKalman(QPointF &ptThumb, QPointF &ptIndex);
 	void filterLowPass(qreal &depth);
