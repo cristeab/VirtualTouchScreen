@@ -39,7 +39,9 @@ public slots:
 	void onTouchUp(const QPoint &ptIndex);
 
 private:
-	void setFingerPointer(QWidget *target, const QString &iconPath, int iconSize = -1);
+	void setFingerPointer(QWidget *target, const QString &iconPath, int iconSize = -1,
+		bool rotate = false);
+	QImage rotate270(const QImage &src);
 	void setupActions();
 	void loadSettings();
 	void saveSettings();

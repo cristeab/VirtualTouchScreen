@@ -29,7 +29,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 	//load finger icons
 	setFingerPointer(this, ":/icons/fingerprint.png", 64);
-	setFingerPointer(thumbPointer, ":/icons/fingerprint.png", 64);
+	setFingerPointer(thumbPointer, ":/icons/fingerprint.png", 64, true);
 	thumbPointer->show();
 
 	loadSettings();
@@ -66,12 +66,16 @@ VirtualTouchScreen::~VirtualTouchScreen()
 }
 
 void VirtualTouchScreen::setFingerPointer(QWidget *target, 
-										  const QString &iconPath, int iconSize)
+										  const QString &iconPath, 
+										  int iconSize, bool rotate)
 {
 	QPixmap pix(iconPath);
-	if ((iconSize != pix.size().width()) && (0 < iconSize))
-	{
+	if ((iconSize != pix.size().width()) && (0 < iconSize)) {
 		pix = pix.scaled(iconSize, iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+	}
+	if (rotate) {
+		QImage orig = pix.toImage();
+		pix = QPixmap::fromImage(rotate270(orig));
 	}
 	if (!pix.isNull()) {
 		QPalette p = palette();
@@ -83,6 +87,17 @@ void VirtualTouchScreen::setFingerPointer(QWidget *target,
 	else {
 		qDebug() << "Cannot load cursor pixmap";
 	}
+}
+
+QImage VirtualTouchScreen::rotate270(const QImage &src) {
+    QImage dst(src.height(), src.width(), src.format());
+    for (int y=0;y<src.height();++y) {
+        const uint *srcLine = reinterpret_cast< const uint * >(src.scanLine(y));
+        for (int x=0;x<src.width();++x) {
+            dst.setPixel(y, src.width()-x-1, srcLine[x]);
+        }
+    }
+    return dst;
 }
 
 void VirtualTouchScreen::setupActions()
