@@ -176,6 +176,7 @@ int GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex)
 	//process depth information
 	if (mainWnd_->virtualScreenThreshold_ >= depthThumb) {
 		//touch down
+		out &= ~GestureAlgos::TouchType::THUMB_UP;
 		out |= GestureAlgos::TouchType::THUMB_DOWN;
 	} else {
 		//touch up
@@ -189,6 +190,7 @@ int GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex)
 	}
 	if (mainWnd_->virtualScreenThreshold_ >= depthIndex) {
 		//touch down
+		out &= ~GestureAlgos::TouchType::INDEX_UP;
 		out |= GestureAlgos::TouchType::INDEX_DOWN;
 	} else {
 		//touch up
