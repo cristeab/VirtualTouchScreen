@@ -58,8 +58,8 @@ GestureThread::GestureThread(VirtualTouchScreen *obj) : QThread(),
 	mainWnd(obj)
 {
 	setupPipeline();
-	connect(this, SIGNAL(moveIndex()), mainWnd, SLOT(onMoveIndex()));
-	connect(this, SIGNAL(moveThumb()), mainWnd, SLOT(onMoveThumb()));
+	connect(this, SIGNAL(moveHand()), mainWnd, SLOT(onMoveHand()));
+	connect(this, SIGNAL(showThumb(bool)), mainWnd, SLOT(onShowThumb(bool)));
 	//link touch signals with the corresponding slots in the main window
 	connect(this, SIGNAL(touchDown(const QPoint&, const QPoint&)), mainWnd, 
 		SLOT(onTouchDown(const QPoint&, const QPoint&)));
@@ -91,11 +91,12 @@ void GestureThread::run()
 				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
 			{
 				//check hand status
-				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {
-					//TODO: use this to show/hide finger markers
+				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {					
 					qDebug() << "hand open";
+					emit showThumb(true);
 				} else if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_CLOSE) {
 					qDebug() << "hand closed";
+					emit showThumb(false);
 				}
 			}
 
@@ -142,9 +143,8 @@ void GestureThread::run()
 				//low pass filter for the depth
 				mainWnd->gestureAlgos->filterLowPass(depth[0], depth[1]);
 
-				//request finger position update
-				emit moveIndex();
-				emit moveThumb();
+				//hand position update
+				emit moveHand();
 
 				//detect touch gesture				
 				switch (mainWnd->gestureAlgos->isTouch(depth[VirtualTouchScreen::THUMB], 
@@ -155,18 +155,33 @@ void GestureThread::run()
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
 						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
-				case GestureAlgos::TouchType::SINGLE_DOWN:
+				case GestureAlgos::TouchType::INDEX_DOWN:
 					qDebug() << "single touch down";
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
+					break;
+				case GestureAlgos::TouchType::THUMB_DOWN:
+					qDebug() << "single touch down";
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
 					qDebug() << "double touch up";
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
 						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
-					//emit tap(handPos);
 					break;
-				case GestureAlgos::TouchType::SINGLE_UP:
+				case GestureAlgos::TouchType::INDEX_UP:
 					qDebug() << "single touch up";
+					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
+					break;
+				case GestureAlgos::TouchType::THUMB_UP:
+					qDebug() << "single touch up";
+					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
+					break;
+				case GestureAlgos::TouchType::INDEX_DOWN_THUMB_UP:
+					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
+					break;
+				case GestureAlgos::TouchType::INDEX_UP_THUMB_DOWN:
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				default:

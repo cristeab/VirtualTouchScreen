@@ -168,31 +168,36 @@ void GestureAlgos::filterLowPass(qreal &depthThumb, qreal &depthIndex)
 	depthIndex = gain_*depthIndex;
 }
 
-GestureAlgos::TouchType GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex)
+int GestureAlgos::isTouch(qreal depthThumb, qreal depthIndex)
 {
 	//permanent variable
-	static GestureAlgos::TouchType out = GestureAlgos::TouchType::NONE;
-
-	//make sure that the previous touch up is send only once
-	if ((GestureAlgos::TouchType::DOUBLE_UP == out) ||
-		(GestureAlgos::TouchType::SINGLE_UP == out)) {
-			out = GestureAlgos::TouchType::NONE;
-			return out;
-	}
+	static int out = GestureAlgos::TouchType::NONE;
 
 	//process depth information
-	if ((mainWnd_->virtualScreenThreshold_ >= depthThumb) || 
-		(mainWnd_->virtualScreenThreshold_ >= depthIndex)) {
+	if (mainWnd_->virtualScreenThreshold_ >= depthThumb) {
 		//touch down
-		out = ((mainWnd_->virtualScreenThreshold_ >= depthThumb) && 
-			(mainWnd_->virtualScreenThreshold_ >= depthIndex))?
-			GestureAlgos::TouchType::DOUBLE_DOWN:GestureAlgos::TouchType::SINGLE_DOWN;
+		out |= GestureAlgos::TouchType::THUMB_DOWN;
 	} else {
 		//touch up
-		if (GestureAlgos::TouchType::DOUBLE_DOWN == out) {
-			out = GestureAlgos::TouchType::DOUBLE_UP;
-		} else if (GestureAlgos::TouchType::SINGLE_DOWN == out) {
-			out = GestureAlgos::TouchType::SINGLE_UP;
+		if (out & GestureAlgos::TouchType::THUMB_DOWN) {
+			out |= GestureAlgos::TouchType::THUMB_UP;
+			out &= ~GestureAlgos::TouchType::THUMB_DOWN;
+		} else {
+			//make sure touch up is send only once
+			out &= ~GestureAlgos::TouchType::THUMB_UP;
+		}
+	}
+	if (mainWnd_->virtualScreenThreshold_ >= depthIndex) {
+		//touch down
+		out |= GestureAlgos::TouchType::INDEX_DOWN;
+	} else {
+		//touch up
+		if (out & GestureAlgos::TouchType::INDEX_DOWN) {
+			out |= GestureAlgos::TouchType::INDEX_UP;
+			out &= ~GestureAlgos::TouchType::INDEX_DOWN;
+		} else {
+			//make sure touch up is send only once
+			out &= ~GestureAlgos::TouchType::INDEX_UP;
 		}
 	}
 

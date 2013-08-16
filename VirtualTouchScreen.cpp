@@ -152,23 +152,24 @@ void VirtualTouchScreen::showHelp()
 		"the application icon on the main toolbar or click the pointer.");
 }
 
-void VirtualTouchScreen::onMoveIndex()
+void VirtualTouchScreen::onMoveHand()
 {
 	QMutexLocker lock(&skeletonPointMutex_);
-	const QSize &size = this->size();
+	QSize size = this->size();
 	move(handSkeletonPoints_[INDEX].x()-size.width()/2, 
 		handSkeletonPoints_[INDEX].y()-size.height()/2);
+	if (NULL != thumbPointer) {
+		size = thumbPointer->size();
+		thumbPointer->move(handSkeletonPoints_[THUMB].x()-size.width()/2, 
+			handSkeletonPoints_[THUMB].y()-size.height()/2);
+	}
 }
 
-void VirtualTouchScreen::onMoveThumb()
+void VirtualTouchScreen::onShowThumb(bool visible)
 {
-	if (NULL == thumbPointer) {
-		return;
+	if (NULL != thumbPointer) {
+		thumbPointer->setVisible(visible);
 	}
-	QMutexLocker lock(&skeletonPointMutex_);
-	const QSize &size = thumbPointer->size();
-	thumbPointer->move(handSkeletonPoints_[THUMB].x()-size.width()/2, 
-		handSkeletonPoints_[THUMB].y()-size.height()/2);
 }
 
 void VirtualTouchScreen::onSwipe(BYTE code)

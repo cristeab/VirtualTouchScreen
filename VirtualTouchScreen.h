@@ -29,8 +29,8 @@ public:
 public slots:
 	void showMenu();
 	void showHelp();
-	void onMoveIndex();
-	void onMoveThumb();
+	void onMoveHand();
+	void onShowThumb(bool visible);
 	void onSwipe(BYTE code);
 	//touch screen slots
 	void onTouchDown(const QPoint &ptThumb, const QPoint &ptIndex);

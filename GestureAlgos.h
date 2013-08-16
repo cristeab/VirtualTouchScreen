@@ -39,10 +39,13 @@ public:
 	//filters
 	int filterKalman(QPointF &ptThumb, QPointF &ptIndex);
 	void filterLowPass(qreal &depthThumb, qreal &depthIndex);
-	//detect when the hand touches the virtual touch screen
+	//detects which finger touches the virtual touch screen
 	//the OS decides which gesture has been made
-	enum TouchType {NONE = 0, SINGLE_DOWN, SINGLE_UP, DOUBLE_DOWN, DOUBLE_UP};
-	TouchType isTouch(qreal depthThumb, qreal depthIndex);
+	enum TouchType {NONE = 0, 
+		INDEX_DOWN = 0x01, THUMB_DOWN = 0x02, DOUBLE_DOWN = 0x03,
+		INDEX_UP = 0x10, THUMB_UP = 0x20, DOUBLE_UP = 0x30,
+		INDEX_UP_THUMB_DOWN = 0x12, INDEX_DOWN_THUMB_UP = 0x21};
+	int isTouch(qreal depthThumb, qreal depthIndex);
 private:
 	int initKalman();
 	struct BiquadState {
