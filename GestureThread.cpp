@@ -165,24 +165,30 @@ void GestureThread::run()
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
 					qDebug() << "sending double touch up";
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
+						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());//needed by touch up
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
 						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_UP:
 					qDebug() << "sending index touch up";
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::THUMB_UP:
 					qDebug() << "sending thumb touch up";
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_DOWN_THUMB_UP:
 					qDebug() << "sending index down thumb up";
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_UP_THUMB_DOWN:
 					qDebug() << "sending index up thumb down";
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());					
 					break;
@@ -190,7 +196,7 @@ void GestureThread::run()
 					qDebug() << "touch type is none";
 					break;
 				default:
-					qDebug() << "unknown touch type";
+					qDebug() << "Error: unknown touch type";
 				}
 			}
 
