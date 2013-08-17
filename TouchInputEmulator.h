@@ -16,5 +16,6 @@ private:
 	void initContact(const QPoint &pt, int id);
 	enum {MAX_NB_CONTACT_POINTS = 2};
 	bool ready_;
+	bool update_;
 	POINTER_TOUCH_INFO contact_[MAX_NB_CONTACT_POINTS];
 };

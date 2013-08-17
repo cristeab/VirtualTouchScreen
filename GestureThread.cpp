@@ -151,41 +151,46 @@ void GestureThread::run()
 					depth[VirtualTouchScreen::INDEX]))
 				{
 				case GestureAlgos::TouchType::DOUBLE_DOWN:
-					qDebug() << "double touch down";
+					qDebug() << "sending double touch down";
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
 						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_DOWN:
-					qDebug() << "single touch down";
+					qDebug() << "sending index touch down";
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::THUMB_DOWN:
-					qDebug() << "single touch down";
+					qDebug() << "sending thumb touch down";
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					break;
 				case GestureAlgos::TouchType::DOUBLE_UP:
-					qDebug() << "double touch up";
+					qDebug() << "sending double touch up";
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint(), 
 						mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_UP:
-					qDebug() << "single touch up";
+					qDebug() << "sending index touch up";
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::THUMB_UP:
-					qDebug() << "single touch up";
+					qDebug() << "sending thumb touch up";
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_DOWN_THUMB_UP:
+					qDebug() << "sending index down thumb up";
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
 					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
 					break;
 				case GestureAlgos::TouchType::INDEX_UP_THUMB_DOWN:
-					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());
+					qDebug() << "sending index up thumb down";
 					emit touchUp(mainWnd->handSkeletonPoints_[VirtualTouchScreen::INDEX].toPoint());
+					emit touchDown(mainWnd->handSkeletonPoints_[VirtualTouchScreen::THUMB].toPoint());					
+					break;
+				case GestureAlgos::TouchType::NONE:
+					qDebug() << "touch type is none";
 					break;
 				default:
-					(void)0;
+					qDebug() << "unknown touch type";
 				}
 			}
 

@@ -50,7 +50,6 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
 	gestureThread = new GestureThread(this);
-	connect(gestureThread, SIGNAL(moveThumb()), this, SLOT(update()));
 	gestureThread->start();
 }
 
@@ -210,14 +209,14 @@ void VirtualTouchScreen::onTouchDown(const QPoint &ptIndex)
 void VirtualTouchScreen::onTouchUp(const QPoint &ptThumb, const QPoint &ptIndex)
 {
 	if ((NULL != touch_) && (EXIT_FAILURE == touch_->touchUp(ptThumb, ptIndex))) {
-		qDebug() << "Cannot send double touch down";
+		qDebug() << "Cannot send double touch up";
 	}
 }
 
 void VirtualTouchScreen::onTouchUp(const QPoint &ptIndex)
 {
 	if ((NULL != touch_) && (EXIT_FAILURE == touch_->touchUp(ptIndex))) {
-		qDebug() << "Cannot send single touch down";
+		qDebug() << "Cannot send single touch up";
 	}
 }
 
