@@ -2,7 +2,8 @@
 #include <QDebug>
 #include "TouchInputEmulator.h"
 
-TouchInputEmulator::TouchInputEmulator() : update_(false)
+TouchInputEmulator::TouchInputEmulator() : update_(false), 
+	singleTouch_(false)
 {
 	if (TRUE == InitializeTouchInjection(MAX_NB_CONTACT_POINTS, TOUCH_FEEDBACK_DEFAULT)) {
 		ready_ = true;
@@ -50,6 +51,7 @@ int TouchInputEmulator::touchDown(const QPoint &pt)
 		qDebug() << "Error in InjectTouchInput " << GetLastError();
 		return EXIT_FAILURE;
 	}
+	singleTouch_ = true;
 	qDebug() << "single touch down at" << pt;
 	return EXIT_SUCCESS;
 }
@@ -59,7 +61,7 @@ int TouchInputEmulator::touchUp(const QPoint &pt)
 	if (!ready_) { // Here number of contact point is declared as 1.
 		qDebug() << "Error in InitializeTouchInjection";
 		return EXIT_FAILURE;
-	}	
+	}
 
 	initContact(pt, 0);
 	contact_[0].pointerInfo.pointerFlags = POINTER_FLAG_UP;
@@ -67,7 +69,8 @@ int TouchInputEmulator::touchUp(const QPoint &pt)
 	if (FALSE == InjectTouchInput(1, contact_)) { // Injecting the touch up from screen
 		qDebug() << "Error in InjectTouchInput " << GetLastError();
 		return EXIT_FAILURE;
-	}	
+	}
+	singleTouch_ = false;
 	qDebug() << "single touch up at" << pt;
 	return EXIT_SUCCESS;
 }
@@ -77,6 +80,10 @@ int TouchInputEmulator::touchDown(const QPoint &pt1, const QPoint &pt2)
 	if (!ready_) { // Here number of contact point is declared as 1.
 		qDebug() << "Error in InitializeTouchInjection";
 		return EXIT_FAILURE;
+	}
+	if (singleTouch_) {
+		touchDown(pt1);
+		touchUp(pt1);//needed before using double point touch gesture
 	}
 	initContact(pt1, 0);
 	initContact(pt2, 1);
@@ -112,7 +119,7 @@ int TouchInputEmulator::touchUp(const QPoint &pt1, const QPoint &pt2)
 	if (FALSE == InjectTouchInput(2, contact_)) { // Injecting the touch up from screen
 		qDebug() << "Error in InjectTouchInput " << GetLastError();
 		return EXIT_FAILURE;
-	}	
+	}
 	qDebug() << "double touch up at" << pt1 << "," << pt2;
 	return EXIT_SUCCESS;
 }

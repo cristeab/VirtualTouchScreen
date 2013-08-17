@@ -17,5 +17,6 @@ private:
 	enum {MAX_NB_CONTACT_POINTS = 2};
 	bool ready_;
 	bool update_;
+	bool singleTouch_;
 	POINTER_TOUCH_INFO contact_[MAX_NB_CONTACT_POINTS];
 };
