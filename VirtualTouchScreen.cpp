@@ -26,7 +26,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	virtualScreenThreshold_(0.35)
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Popup);
 	//load finger icons
 	setFingerPointer(this, ":/icons/fingerprint.png", 64);
 	setFingerPointer(thumbPointer, ":/icons/fingerprint.png", 64, true);
