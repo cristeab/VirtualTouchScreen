@@ -41,6 +41,7 @@ public slots:
 private:
 	void setFingerPointer(QWidget *target, const QString &iconPath, int iconSize = -1,
 		bool rotate = false);
+	void loadFingerIcons(const QString &iconPath, int iconSize);
 	QImage rotate270(const QImage &src);
 	void setupActions();
 	void loadSettings();
@@ -56,6 +57,9 @@ private:
 	QMutex skeletonPointMutex_;
 	TouchInputEmulator *touch_;
 	qreal virtualScreenThreshold_;
+	QString fingerIcon_;
+	int fingerIconSize_;
+	bool hideThumb_;
 };
 
 #endif // VirtualTouchScreen_H

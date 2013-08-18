@@ -19,11 +19,11 @@ include_directories (${CMAKE_SOURCE_DIR}
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#qt5_wrap_ui(UIS_HDRS ConfigDialog.ui)
+qt5_wrap_ui(UIS_HDRS configuration.ui)
 
-set (VirtualTouchScreen_HDRS VirtualTouchScreen.h GestureThread.h TouchInputEmulator.h)
+set (VirtualTouchScreen_HDRS VirtualTouchScreen.h GestureThread.h TouchInputEmulator.h ConfigDialog.h)
 set (VirtualTouchScreen_SRCS VirtualTouchScreen.cpp GestureThread.cpp GestureAlgos.cpp 
-	TouchInputEmulator.cpp main.cpp VirtualTouchScreen.rc)
+	TouchInputEmulator.cpp ConfigDialog.cpp main.cpp VirtualTouchScreen.rc)
 
 set (VirtualTouchScreen_RSC icons.qrc)
 QT5_ADD_RESOURCES (RSCS ${VirtualTouchScreen_RSC})

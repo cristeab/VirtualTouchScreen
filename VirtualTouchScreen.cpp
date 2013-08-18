@@ -10,7 +10,7 @@
 #include "GestureAlgos.h"
 #include "VirtualTouchScreen.h"
 #include "TouchInputEmulator.h"
-//#include "ConfigDialog.h"
+#include "ConfigDialog.h"
 
 #define APPLICATION_NAME "Virtual Touch Screen"
 
@@ -23,14 +23,15 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	config(NULL),
 	handSkeletonPoints_(Hand::POINTS),
 	touch_(new TouchInputEmulator()),
-	virtualScreenThreshold_(0.35)
+	virtualScreenThreshold_(0.35),
+	fingerIcon_(":/icons/fingerprint.png"),
+	fingerIconSize_(64),
+	hideThumb_(false)
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Popup);
-	//load finger icons
-	setFingerPointer(this, ":/icons/fingerprint.png", 64);
-	setFingerPointer(thumbPointer, ":/icons/fingerprint.png", 64, true);
-	thumbPointer->show();
+	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool);
+	loadFingerIcons(fingerIcon_, fingerIconSize_);
+	if (!hideThumb_) thumbPointer->show();
 
 	loadSettings();
 
@@ -44,9 +45,9 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	gestureAlgos->setCorrectionFactors(scaleFactor, offset);
 	gestureAlgos->setMainWindow(this);
 
-	//config = new ConfigDialog(NULL, this);//screen size must be set
-
 	setupActions();
+
+	config = new ConfigDialog(this);
 
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
 	gestureThread = new GestureThread(this);
@@ -88,7 +89,14 @@ void VirtualTouchScreen::setFingerPointer(QWidget *target,
 	}
 }
 
-QImage VirtualTouchScreen::rotate270(const QImage &src) {
+void VirtualTouchScreen::loadFingerIcons(const QString &iconPath, int iconSize)
+{
+	setFingerPointer(this, iconPath, iconSize);
+	setFingerPointer(thumbPointer, iconPath, iconSize, true);	
+}
+
+QImage VirtualTouchScreen::rotate270(const QImage &src)
+{
     QImage dst(src.height(), src.width(), src.format());
     for (int y=0;y<src.height();++y) {
         const uint *srcLine = reinterpret_cast< const uint * >(src.scanLine(y));
@@ -115,18 +123,14 @@ void VirtualTouchScreen::setupActions()
 	helpAction->setShortcut(QKeySequence("F1"));
 	connect(helpAction, SIGNAL(triggered(bool)), this, SLOT(showHelp()));
 	addAction(helpAction);
-
-	QAction *hideAction = new QAction(this);
-	hideAction->setShortcut(QKeySequence("F3"));
-	connect(hideAction, SIGNAL(triggered(bool)), this, SLOT(showMinimized()));
-	addAction(hideAction);
 }
 
 void VirtualTouchScreen::showMenu()
 {
 	if (NULL != config)
 	{
-		//config->show();
+		thumbPointer->hide();
+		config->show();
 	}
 }
 
