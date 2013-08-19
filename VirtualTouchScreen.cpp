@@ -25,7 +25,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	touch_(new TouchInputEmulator()),
 	virtualScreenThreshold_(0.35),
 	fingerIcon_(":/icons/fingerprint.png"),
-	fingerIconSize_(64),
+	fingerIconSize_(32),
 	hideThumb_(false)
 {
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
@@ -176,7 +176,7 @@ void VirtualTouchScreen::onMoveHand()
 	QSize size = this->size();
 	move(handSkeletonPoints_[INDEX].x()-size.width()/2, 
 		handSkeletonPoints_[INDEX].y()-size.height()/2);
-	if (NULL != thumbPointer) {
+	if ((NULL != thumbPointer) && (!hideThumb_)) {
 		size = thumbPointer->size();
 		thumbPointer->move(handSkeletonPoints_[THUMB].x()-size.width()/2, 
 			handSkeletonPoints_[THUMB].y()-size.height()/2);

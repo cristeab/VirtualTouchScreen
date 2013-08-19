@@ -18,8 +18,6 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent)
 		//setup icons list
 		icons_["Fingerprint"] = ":/icons/fingerprint.png";
 		icons_["Black Circle"] = ":/icons/circleblack.png";
-		icons_["Blue Circle Empty"] = ":/icons/circleblueempty.png";
-		icons_["Blue Circle Full"] = ":/icons/circlebluefull.png";
 		icons_["Round Shape"] = ":/icons/round.png";
 		QList<QString> keys = icons_.keys();
 		int curIdx = icons_.count();
@@ -119,11 +117,7 @@ void ConfigDialog::onApply()
 		mainWnd_->fingerIconSize_ = ui_.spinBoxIconSize->value();
 		mainWnd_->loadFingerIcons(mainWnd_->fingerIcon_, mainWnd_->fingerIconSize_);
 		mainWnd_->hideThumb_ = ui_.checkBoxHideThumb->isChecked();
-		if (mainWnd_->hideThumb_) {
-			mainWnd_->thumbPointer->hide();
-		} else {
-			mainWnd_->thumbPointer->show();
-		}
+		mainWnd_->onShowThumb(!mainWnd_->hideThumb_);
 	} else {
 		QMessageBox::warning(this, "Virtual Touch Screen", "Cannot apply settings");
 	}

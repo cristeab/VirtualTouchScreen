@@ -87,8 +87,9 @@ void GestureThread::run()
 
 			//hand position
 			PXCGesture::GeoNode handNode;
-			if(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
-				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE)
+			if((!mainWnd->hideThumb_) &&
+				(gesture->QueryNodeData(0, PXCGesture::GeoNode::LABEL_BODY_HAND_PRIMARY,
+				&handNode) != PXC_STATUS_ITEM_UNAVAILABLE))
 			{
 				//check hand status
 				if (handNode.opennessState & PXCGesture::GeoNode::Openness::LABEL_OPEN) {					
