@@ -3,8 +3,6 @@
         <file>icons/splash.jpg</file>
         <file>icons/fingerprint.png</file>
         <file>icons/circleblack.png</file>
-        <file>icons/circleblueempty.png</file>
-        <file>icons/circlebluefull.png</file>
         <file>icons/round.png</file>
     </qresource>
 </RCC>
