@@ -53,6 +53,13 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	qDebug() << QThread::currentThreadId() << "starting gesture thread";
 	gestureThread = new GestureThread(this);
 	gestureThread->start();
+
+	if (TRUE != SetWindowPos((HWND)winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)) {
+		qDebug() << "Cannot set topmost flag on main (index) window";
+	}
+	if (TRUE != SetWindowPos((HWND)thumbPointer->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE)) {
+		qDebug() << "Cannot set topmost flag on secondary (thumb) window";
+	}
 }
 
 VirtualTouchScreen::~VirtualTouchScreen()
