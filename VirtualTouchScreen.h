@@ -24,7 +24,9 @@ public:
 	explicit VirtualTouchScreen(QWidget *parent = 0);
 	~VirtualTouchScreen();
 	enum {OFFSET_X = 200, OFFSET_Y = 100, 
-		SCALE_FACTOR_x100 = 100};
+		SCALE_FACTOR_x100 = 100,
+		VIRTUAL_SCREEN_THRESHOLD_x100 = 35,
+		FINGER_ICON_SIZE = 32};
 	enum Hand {THUMB = 0, INDEX, POINTS};
 public slots:
 	void showMenu();
@@ -48,9 +50,8 @@ private:
 	void saveSettings();
 	GestureThread *gestureThread;
 	GestureAlgos *gestureAlgos;
-	QString pointerIconPath;
 	QPoint offset;
-	float scaleFactor;
+	qreal scaleFactor;
 	QWidget *thumbPointer;
 	ConfigDialog *config;
 	QVector<QPointF> handSkeletonPoints_;

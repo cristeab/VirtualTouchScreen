@@ -13,6 +13,7 @@
 #include "ConfigDialog.h"
 
 #define APPLICATION_NAME "Virtual Touch Screen"
+#define FINGER_DEFAULT_ICON ":/icons/fingerprint.png"
 
 VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	: QMainWindow(parent),
@@ -23,17 +24,17 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	config(NULL),
 	handSkeletonPoints_(Hand::POINTS),
 	touch_(new TouchInputEmulator()),
-	virtualScreenThreshold_(0.35),
-	fingerIcon_(":/icons/fingerprint.png"),
-	fingerIconSize_(32),
+	virtualScreenThreshold_(VIRTUAL_SCREEN_THRESHOLD_x100/100.0),
+	fingerIcon_(FINGER_DEFAULT_ICON),
+	fingerIconSize_(FINGER_ICON_SIZE),
 	hideThumb_(false)
 {
+	loadSettings();
+
 	setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
 	thumbPointer->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Tool);
 	loadFingerIcons(fingerIcon_, fingerIconSize_);
-	if (!hideThumb_) thumbPointer->show();
-
-	loadSettings();
+	if (!hideThumb_) thumbPointer->show();	
 
 	//get screen size
 	QDesktopWidget *desktop = QApplication::desktop();
@@ -163,7 +164,6 @@ void VirtualTouchScreen::showHelp()
 		"   The following shortcut keys are available:\n"
 		"- F1: shows this help\n"
 		"- F2: shows the configuration dialog\n"
-		"- F3: minimizes the pointer\n"
 		"- Ctrl+q: quits the application\n"
 		"In order to receive the shortcut keys the application needs to have "
 		"the focus (see above). In order to have the focus either click on "
@@ -225,19 +225,22 @@ void VirtualTouchScreen::onTouchUp(const QPoint &ptIndex)
 }
 
 #define COMPANY_NAME "Bogdan Cristea"
-#define POINTER_ICON_PATH "PointerIconPath"
-#define KEY_POINTER_SIZE "PointerSize"
+#define KEY_VIRTUAL_SCREEN_THRESHOLD "VirtualScreenThreshold"
+#define KEY_FINGER_ICON "FingerIcon"
+#define KEY_FINGER_ICON_SIZE "FingerIconSize"
 #define KEY_OFFSET_X "OffsetX"
 #define KEY_OFFSET_Y "OffsetY"
 #define SCALE_FACTOR "ScaleFactor"
-#define NB_SWIPES "NbSwipes"
-#define TAP_FOR_FORWARD_SWITCH "TapForForwardSwitch"
-#define USE_KALMAN_FILTER "UseKalmanFilter"
+#define KEY_HIDE_THUMB "HideThumb"
 
 void VirtualTouchScreen::loadSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
-	pointerIconPath = settings.value(POINTER_ICON_PATH, ":/icons/green-pointer.png").toString();
+	virtualScreenThreshold_ = settings.value(KEY_VIRTUAL_SCREEN_THRESHOLD, 
+		VIRTUAL_SCREEN_THRESHOLD_x100/100.0).toDouble();
+	fingerIcon_ = settings.value(KEY_FINGER_ICON, FINGER_DEFAULT_ICON).toString();
+	fingerIconSize_ = settings.value(KEY_FINGER_ICON_SIZE, FINGER_ICON_SIZE).toInt();
+	hideThumb_ = settings.value(KEY_HIDE_THUMB, false).toBool();
 	offset.setX(settings.value(KEY_OFFSET_X, OFFSET_X).toInt());
 	offset.setY(settings.value(KEY_OFFSET_Y, OFFSET_Y).toInt());
 	scaleFactor = settings.value(SCALE_FACTOR, SCALE_FACTOR_x100/100.0).toDouble();
@@ -246,7 +249,10 @@ void VirtualTouchScreen::loadSettings()
 void VirtualTouchScreen::saveSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
-	settings.setValue(POINTER_ICON_PATH, pointerIconPath);
+	settings.setValue(KEY_VIRTUAL_SCREEN_THRESHOLD, virtualScreenThreshold_);
+	settings.setValue(KEY_FINGER_ICON, fingerIcon_);
+	settings.setValue(KEY_FINGER_ICON_SIZE, fingerIconSize_);
+	settings.setValue(KEY_HIDE_THUMB, hideThumb_);
 	settings.setValue(KEY_OFFSET_X, offset.x());
 	settings.setValue(KEY_OFFSET_Y, offset.y());
 	settings.setValue(SCALE_FACTOR, scaleFactor);
