@@ -10,7 +10,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent)
 	//setup
 	mainWnd_ = dynamic_cast<VirtualTouchScreen*>(parent);
 	if (NULL != mainWnd_) {
-		ui_.doubleSpinBoxThreshold->setValue(mainWnd_->virtualScreenThreshold_);
+		ui_.spinBoxThreshold->setValue(static_cast<int>(100*mainWnd_->virtualScreenThreshold_));
 		ui_.spinBoxOffsetX->setValue(mainWnd_->offset.x());
 		ui_.spinBoxOffsetY->setValue(mainWnd_->offset.y());
 		ui_.spinBoxScaleFactor->setValue(static_cast<int>(100*mainWnd_->scaleFactor));
@@ -61,7 +61,7 @@ ConfigDialog::ConfigDialog(QWidget *parent) : QDialog(parent)
 
 void ConfigDialog::onBrowse()
 {
-	QFileDialog openFile(NULL, "Select an Image File");//always in the center of the screen
+	QFileDialog openFile(this, "Select an Image File");//always in the center of the screen
 	openFile.setFileMode(QFileDialog::ExistingFile);
 	openFile.setViewMode(QFileDialog::Detail);
 	openFile.setNameFilter("*.png *.jpg *.jpeg");
@@ -103,7 +103,7 @@ void ConfigDialog::onCancel()
 void ConfigDialog::onApply()
 {
 	if (NULL != mainWnd_) {
-		mainWnd_->virtualScreenThreshold_ = ui_.doubleSpinBoxThreshold->value();
+		mainWnd_->virtualScreenThreshold_ = ui_.spinBoxThreshold->value()/100.0;
 		mainWnd_->offset.setX(ui_.spinBoxOffsetX->value());
 		mainWnd_->offset.setY(ui_.spinBoxOffsetY->value());
 		mainWnd_->scaleFactor = ui_.spinBoxScaleFactor->value()/100.0;

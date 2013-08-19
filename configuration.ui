@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>273</width>
-    <height>361</height>
+    <height>349</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>320</y>
+     <y>310</y>
      <width>231</width>
      <height>32</height>
     </rect>
@@ -35,55 +35,22 @@
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>18</x>
+     <x>28</x>
      <y>10</y>
-     <width>231</width>
+     <width>211</width>
      <height>31</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Virtual Screen Threshold</string>
+       <string>Virtual Screen Threshold [cm]</string>
       </property>
      </widget>
     </item>
     <item>
-     <widget class="QDoubleSpinBox" name="doubleSpinBoxThreshold">
-      <property name="maximum">
-       <double>999.990000000000009</double>
-      </property>
-      <property name="singleStep">
-       <double>0.100000000000000</double>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer name="horizontalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
+     <widget class="QSpinBox" name="spinBoxThreshold"/>
     </item>
    </layout>
   </widget>
@@ -91,7 +58,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>50</y>
+     <y>180</y>
      <width>231</width>
      <height>121</height>
     </rect>
@@ -182,9 +149,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>180</y>
+     <y>50</y>
      <width>231</width>
-     <height>131</height>
+     <height>121</height>
     </rect>
    </property>
    <property name="title">
@@ -220,7 +187,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
+      <y>50</y>
       <width>171</width>
       <height>31</height>
      </rect>
@@ -246,7 +213,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>100</y>
+      <y>80</y>
       <width>171</width>
       <height>31</height>
      </rect>

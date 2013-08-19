@@ -25,7 +25,7 @@ public:
 	~VirtualTouchScreen();
 	enum {OFFSET_X = 200, OFFSET_Y = 100, 
 		SCALE_FACTOR_x100 = 100,
-		VIRTUAL_SCREEN_THRESHOLD_x100 = 35,
+		VIRTUAL_SCREEN_THRESHOLD_CM = 35,
 		FINGER_ICON_SIZE = 32};
 	enum Hand {THUMB = 0, INDEX, POINTS};
 public slots:

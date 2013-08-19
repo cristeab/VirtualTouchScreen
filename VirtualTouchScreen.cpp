@@ -24,7 +24,7 @@ VirtualTouchScreen::VirtualTouchScreen(QWidget *parent)
 	config(NULL),
 	handSkeletonPoints_(Hand::POINTS),
 	touch_(new TouchInputEmulator()),
-	virtualScreenThreshold_(VIRTUAL_SCREEN_THRESHOLD_x100/100.0),
+	virtualScreenThreshold_(VIRTUAL_SCREEN_THRESHOLD_CM/100.0),
 	fingerIcon_(FINGER_DEFAULT_ICON),
 	fingerIconSize_(FINGER_ICON_SIZE),
 	hideThumb_(false)
@@ -246,7 +246,7 @@ void VirtualTouchScreen::loadSettings()
 {
 	QSettings settings(COMPANY_NAME, APPLICATION_NAME);
 	virtualScreenThreshold_ = settings.value(KEY_VIRTUAL_SCREEN_THRESHOLD, 
-		VIRTUAL_SCREEN_THRESHOLD_x100/100.0).toDouble();
+		VIRTUAL_SCREEN_THRESHOLD_CM/100.0).toDouble();
 	fingerIcon_ = settings.value(KEY_FINGER_ICON, FINGER_DEFAULT_ICON).toString();
 	fingerIconSize_ = settings.value(KEY_FINGER_ICON_SIZE, FINGER_ICON_SIZE).toInt();
 	hideThumb_ = settings.value(KEY_HIDE_THUMB, false).toBool();
