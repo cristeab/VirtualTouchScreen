@@ -22,14 +22,14 @@ int GestureAlgos::initKalman()
 	measurement_.setTo(cv::Scalar(0));
 	KF_.statePre.at<float>(0) = static_cast<float>(screen_.width())/2.0;//x0
 	KF_.statePre.at<float>(1) = static_cast<float>(screen_.height())/2.0;//y0
-	KF_.statePre.at<float>(2) = 0;//dx0
-	KF_.statePre.at<float>(3) = 0;//dy0
-	KF_.statePre.at<float>(4) = static_cast<float>(screen_.width())/2.0;//x1
-	KF_.statePre.at<float>(5) = static_cast<float>(screen_.height())/2.0;//y1
+	KF_.statePre.at<float>(2) = static_cast<float>(screen_.width())/2.0;//x1
+	KF_.statePre.at<float>(3) = static_cast<float>(screen_.height())/2.0;//y1
+	KF_.statePre.at<float>(4) = 0;//dx0
+	KF_.statePre.at<float>(5) = 0;//dy0
 	KF_.statePre.at<float>(6) = 0;//dx1
 	KF_.statePre.at<float>(7) = 0;//dy1
 	KF_.transitionMatrix = *(cv::Mat_<float>(8, 8) << 
-	//  x0,y0,dx0,dy0,x1,y2,dx1,dy1,
+	//  x0,y0,x1,y1,dx0,dy0,dx1,dy1,
 		1,0,0,0,0,0,0,0,   
 		0,1,0,0,0,0,0,0,  
 		0,0,1,0,0,0,0,0,  
