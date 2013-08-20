@@ -14,7 +14,7 @@ computing.
 and of radius equal with a virtual touch screen threshold. Once the fingers are
 on the sphere or inside a touch event is generated. Since both the thumb and the
 index fingers are tracked, in theory, all eight gestures supported in Windows 8
-are available:"
+are available:
  - Press and Hold
  - Tap
  - Slide
